@@ -12,6 +12,8 @@ struct Chalk_Rat {
 	short d;
 	signed char x_increment;
 	signed char y_increment;
+
+	_Bool justCornered;
 };
 
 static inline void Chalk_Rat_init(struct Chalk_Rat *self, struct Chalk_Point south, struct Chalk_Point north)
@@ -41,25 +43,47 @@ static inline void Chalk_Rat_init(struct Chalk_Rat *self, struct Chalk_Point sou
 		self->d = 2 * self->abs_slope.x - self->abs_slope.y;
 	}
 }
-static inline void Chalk_Rat_step(struct Chalk_Rat *self)
+static inline struct Chalk_Point Chalk_Rat_step(struct Chalk_Rat *self)
 {
-	if (self->abs_slope.x > self->abs_slope.y) {
-		self->at.x += self->x_increment;
+	if (self->abs_slope.y < self->abs_slope.x) {
 		if (self->d > 0) {
+			if (!self->justCornered) {
+				self->justCornered = 1;
+				return (struct Chalk_Point) {
+					.x = self->at.x,
+					.y = self->at.y + self->y_increment
+				};
+			}
+			self->justCornered = 0;
+
 			self->at.y += self->y_increment;
 			self->d += 2 * (self->abs_slope.y - self->abs_slope.x);
 		} else {
 			self->d += 2 * self->abs_slope.y;
 		}
-	} else {
-		self->at.y += self->y_increment;
-		if (self->d > 0) {
-			self->at.x += self->x_increment;
-			self->d += 2 * (self->abs_slope.x - self->abs_slope.y);
-		} else {
-			self->d += 2 * self->abs_slope.x;
-		}
+
+		self->at.x += self->x_increment;
+		return self->at;
 	}
+
+	if (self->d > 0) {
+		if (!self->justCornered) {
+			self->justCornered = 1;
+			return (struct Chalk_Point) {
+				.x = self->at.x + self->x_increment,
+				.y = self->at.y
+			};
+		}
+		self->justCornered = 0;
+
+		self->at.x += self->x_increment;
+		self->d += 2 * (self->abs_slope.x - self->abs_slope.y);
+	} else {
+		self->d += 2 * self->abs_slope.x;
+	}
+
+	self->at.y += self->y_increment;
+	return self->at;
 }
 
 

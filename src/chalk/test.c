@@ -8,10 +8,10 @@
 
 int main() {
 
-	struct Chalk_Point bounds = { 10, 10 };
+	struct Chalk_Point bounds = {25,25};
 
-	struct Chalk_Point south = {9,9};
-	struct Chalk_Point north = {3,5};
+	struct Chalk_Point south = {24,23};
+	struct Chalk_Point north = {15,3};
 
 	struct Chalk_Rat rat;
 	Chalk_Rat_init(&rat, south, north);
@@ -24,19 +24,23 @@ int main() {
 	}
 
 	for (int i = 0; i < bounds.x * bounds.y; ++i) {
-		outstr[i] = '.';
+		outstr[i] = '-';
 	}
 
+	outstr[rat.at.y * bounds.y + rat.at.x] = '(';
+	// skipping check for if south == north
 	struct Chalk_Point ratted;
 	for (int i = 0; i < 100; ++i) {
 
-		outstr[rat.at.y * bounds.y + rat.at.x] = i + '0';
-		printf("(%d, %d)\n", rat.at.x, rat.at.y);
+		ratted = Chalk_Rat_step(&rat);
+		outstr[ratted.y * bounds.y + ratted.x] = i + '0';
 
-		if (Chalk_Point_equal(rat.at, north)) {
+		printf("at: (%d, %d) gave: (%d, %d)\n", rat.at.x, rat.at.y, ratted.x, ratted.y);
+
+		if (Chalk_Point_equal(ratted, north)) {
+			outstr[ratted.y * bounds.y + ratted.x] = ')';
 			break;
 		}
-		Chalk_Rat_step(&rat);
 	}
 
 	for (int iy = bounds.y - 1; iy >= 0; --iy) {
