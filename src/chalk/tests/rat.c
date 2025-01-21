@@ -1,7 +1,7 @@
 
-#include "./point.h"
-#include "./chalk.h"
-#include "./rat.h"
+#include "../point.h"
+#include "../chalk.h"
+#include "../rat.h"
 
 #include <stdlib.h>
 #include <stdio.h>
