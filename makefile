@@ -28,18 +28,28 @@ default: \
 run: ./a.out
 	./a.out $(args)
 
-gunc: $(src)/gunc
-	cd $(src)/gunc \
+
+library:
+	cd $(src)/$(lib_name) \
 	&& \
 	gcc $(gccflags) \
 		-c \
 		\
-		$(args) \
+		$(lib_args) \
 		\
-		file_logger.c \
+		$(lib_cfiles) \
 		\
+		$(lib_links) \
 	&& \
 	mkdir -p $(obdir) \
 	&& \
 	mv *.o $(obdir)
-	ar rcs $(src)/libgunc.a $(src)/gunc/$(obdir)/*.o \
+	ar rcs $(src)/lib$(lib_name).a $(src)/$(lib_name)/$(obdir)/*.o
+
+
+gunc:
+	make library \
+		lib_name=gunc \
+		lib_cfiles=" \
+			file_logger.c \
+		"
