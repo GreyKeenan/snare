@@ -11,6 +11,7 @@
 #include "SDL2/SDL.h"
 
 #include <stdlib.h>
+#include <time.h>
 
 struct Gunc_iLog logger = {0};
 struct Gunc_iLog *global_logger = &logger;
@@ -44,7 +45,8 @@ int main(int argc, const char **argv)
 	}
 
 	window = SDL_CreateWindow("Warped Grid!",
-		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		//SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		0, 0,
 		500, 500,
 		0 /*flags*/
 	);
@@ -53,6 +55,13 @@ int main(int argc, const char **argv)
 		e = 1;
 		goto fin;
 	}
+	/*
+	e = SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	if (e < 0) {
+		log_err("unable to set fullscreen");
+		goto fin;
+	}
+	*/
 
 	renderer = SDL_CreateRenderer(window, -1, 0);
 	if (renderer == NULL) {
@@ -60,6 +69,8 @@ int main(int argc, const char **argv)
 		e = 1;
 		goto fin;
 	}
+
+	SDL_RenderPresent(renderer);
 
 
 	e = SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
@@ -76,8 +87,9 @@ int main(int argc, const char **argv)
 	}
 	*/
 
-
-	struct Bagel_xorshiftr128plus rstate = Bagel_xorshiftr128plus_seed(1);
+	time_t rawtime;
+	time(&rawtime);
+	struct Bagel_xorshiftr128plus rstate = Bagel_xorshiftr128plus_seed(rawtime);
 
 	uint64_t data64[8] = {
 		Bagel_xorshiftr128plus_run(&rstate),
@@ -91,7 +103,7 @@ int main(int argc, const char **argv)
 	};
 
 	struct Carrie_SkewGrid sg = {0};
-	e = Carrie_SkewGrid_init(&sg, (unsigned char *)data64, 8, 8, 8);
+	e = Carrie_SkewGrid_init(&sg, (unsigned char *)data64, 8, 8, Carrie_boint_MAX);
 	if (e) {
 		log_err("unable to init skewgrid: %d", e);
 		goto fin;
@@ -139,30 +151,34 @@ int draw_SkewGrid(SDL_Renderer *renderer, const struct Carrie_SkewGrid *sg)
 			return 1;
 		}
 
-		e = Carrie_SkewGrid_index_i(sg, i + sg->width, &b); //can serve as a for next
-		if (e) {
-			log_err("skewgrid index failed (b1): %d / index: %d width: %d height: %d", e, i, sg->width, sg->height);
-			//return 1;
-			continue;
-		}
 
-		e = SDL_RenderDrawLine(renderer, a.x + 32, a.y + 32, b.x + 32, b.y + 32);
-		if (e < 0) {
-			log_err("failed to draw line: %d", e);
-			return 2;
-		}
+		if (i / sg->width + 1 != sg->height) {
+			e = Carrie_SkewGrid_index_i(sg, i + sg->width, &b); //can serve as a for next
+			if (e) {
+				log_err("skewgrid index failed (b1): %d / index: %d width: %d height: %d", e, i, sg->width, sg->height);
+				return 1;
+			}
 
-		e = Carrie_SkewGrid_index_i(sg, i + 1, &b); //can serve as a for next
-		if (e) {
-			log_err("skewgrid index failed (b2): %d", e);
-			//return 1;
-			continue;
+			e = SDL_RenderDrawLine(renderer, a.x + 32, a.y + 32, b.x + 32, b.y + 32);
+			if (e < 0) {
+				log_err("failed to draw line: %d", e);
+				return 2;
+			}
 		}
+		
+		if ((i + 1) % sg->width) {
 
-		e = SDL_RenderDrawLine(renderer, a.x + 32, a.y + 32, b.x + 32, b.y + 32);
-		if (e < 0) {
-			log_err("failed to draw line: %d", e);
-			return 2;
+			e = Carrie_SkewGrid_index_i(sg, i + 1, &b); //can serve as a for next
+			if (e) {
+				log_err("skewgrid index failed (b2): %d", e);
+				return 1;
+			}
+
+			e = SDL_RenderDrawLine(renderer, a.x + 32, a.y + 32, b.x + 32, b.y + 32);
+			if (e < 0) {
+				log_err("failed to draw line: %d", e);
+				return 2;
+			}
 		}
 	}
 
