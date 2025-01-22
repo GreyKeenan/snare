@@ -23,7 +23,8 @@ default: \
 		main.c \
 		\
 		-L . \
-		-l gunc
+		-l gunc \
+		-l SDL2
 
 run: ./a.out
 	./a.out $(args)

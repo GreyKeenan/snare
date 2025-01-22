@@ -4,6 +4,7 @@
 #include "pp.h"
 
 #include <stdarg.h>
+#include <stddef.h>
 
 #define Gunc_LOG_ONE(...) __VA_ARGS__, 0
 #define Gunc_LOG_MANY(s, ...) s, Gunc_PP_COUNT_32(__VA_ARGS__), __VA_ARGS__
