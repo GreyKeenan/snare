@@ -32,4 +32,5 @@ a,b,c is a triangle
 		.y = (a.y * refa + b.y * refb + c.y * refc)
 	};
 }
+
 #endif
