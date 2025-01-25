@@ -8,87 +8,118 @@ Thinking through how I want polygon generation to go.
 <br>
 
 <!-- INDEX -->
-* Overall Approach
+* Approaches
+  * Line-walking
+  * Deforming a grid
+  * Voronoi Diagrams
+  * Delaunay Triangulation
 
 <br>
 
-Overall Approach
+Approaches
 ==================================================
 
-Ideally:
+* line-walking with heuristics
 
-1. generate continent borders
-1. fill it in
+  > Could start with a boundary (or use rectangle)
+    and then generate shapes inwards,
+    or could start with a single shape & build off of it outwards.
 
-However, it might be easier to balloon from the inside out:
+  > Creating a set of heuristics for drawing the lines
+    is potentially really annoying.
 
-1. Generate 'center' shape
-1. store shape
-1. add bordering shape
-1. store shape
-1. Update 'center' shape as combined border of both shapes
-1. repeat
+* deforming a grid
 
-Alternatively, could:
+  > Start with a perfect grid,
+    then move vertices around to deform it.
+    Cells may be joined or cut
+    to create polygons with different numbers of sides.
 
-1. do method 2 above
-1. Generate a large random polygon
-1. overlay polygon on the map from step 1
-  removing stuff that doesnt fit inside, given a minimum size
+* Voronoi Diagrams
 
-I'll try to proceed with the first method for now.
-I know its *possible*, so lets give it a shot.
+  > From a random distribution of points,
+    regions are drawn by grouping all pixels
+    which are closest to a given point.
 
+  > Different distance-calculations can be used to alter the shapes.
 
-Configuration
---------------------------------------------------
+* Delaunay Triangulation
 
-I want to be able to configure max-width and min-width values,
-so the shapes arent super thin.
-Also, a minimum-bordering-amount should be in place,
-so you can tell visually when things border each other.
+  > Method of connecting a random set of points to form a grid-of-traingles.
+
+* using random noise functions
+* ...?
 
 
-Outwards-in
+Deforming a Grid
 ==================================================
 
-The steps would look something like:
+This approach seems like about what I want.
+Its fairly simple/straightforward. (I think?)
+I'm just outlining a naive approach.
 
-1. Generate a random polygon.
-  I'll call it 'George'.
-1. Pick a point along George.
-1. Walk (a distance) along the border from that point to the next.
-1. Create a new point there. This is 1 border of our inner shape.
-1. Create a line/point INSIDE the polygon.
+NVM:
+I implemtented it (see `expl_warped` branch).
+Its *alright*, but a little more regular
+than I wanted out-the-gate.
+Ik i could iterate over it with other operations,
+but after messing with some voronoi-diagram-generation sites,
+I think that is closer to the shape that I want.
 
-  > You can know which side of the line is the inside based on
-    when you generated the original polygon.
-    HOWEVER, you still need to verify that its inside with other info,
-    since you could overshoot the opposite wall of the polygon
-    or go too low/high and go past the next line in the sequence.
-    Everything to the left (or right) of the original line,
-    considering the order of the points,
-    should be inside (or outside).
-    Then, when you add new shapes to it (later),
-    everything outside of them becomes the new inside of George,
-    as long as you add their points in the correct order.
+1. Start with a grid of non-adjacent points.
+  Lets call the gap between each point `g`.
+1. Apply a random integer offset to each point in the grid.
+  It should be between `0` and `(g - minimum_width) / 2`.
+  This prevents offset-points from crossing over other lines.
+1. go through and randomly remove sides/vertices to join some cells.
+  This is the part that I'm not entirely sure how to handle yet.
+  It depends on how I lay out the grid of pixels in memory.
 
-1. connect the ends of the new point & the bordering line together.
-1. Update George's borders with the new inner bounds from the polygon.
-1. repeat
+Ideas for memory layout
 
-This has some edge cases though:
+* literally a grid of (x,y) pairs.
+  `grid[0][0]`, `grid[0][1]`, `grid[1][0]`, and `grid[1][1]`
+  together represent a cell.
 
-* What happens when the new polygon would
-  collide with George's borders another time?
-  If this is disallowed, territories would have
-  at most 1 border with George, which is odd.
-  If allowed, additional collisions with George
-  need to be registered somehow so George's internal bounds can be updated.
-  Also, the new polygon's shape has to follow along George's bounds.
-* Gaps are possible.
-  If disallowed, ... how?
-  If allowed, need to be weighted really well,
-  otherwise there could be a tendency for donut-like shapes,
-  OR there could be incomplete connections.
+  > When removing vertices, you can replace them with a `NULL` value.
+    NULL vertices redirect to the prior point perhaps?
+    Or do they get removed entirely?
 
+  > Hm. This means that territories always meet up at corners, though.
+    I don't really like how that behaves.
+    Really, I want to be able to remove lines *and/or* vertices.
+    With a grid of points, that doesn't really work
+    since the lines themselves are the implied connections between points
+    rather than actually encoded somewhere.
+
+  > I could add a byte between every point to indicate the status of the line.
+    That's annoying though.
+    Similarly, maybe points could be like 12 bits,
+    and the remaining bits could carry more information?
+    12 is plenty.
+
+could save space if each point in the grid
+is an offset from that-point's index,
+rather than an absolute value itself.
+Then, each point in the grid could be 2 bytes or even less
+
+~~~
+XxxxYyyy
+
+(actually, `xxxXYyyy` moving the sign bits makes it easier to bitshift)
+~~~
+
+Then, all I have to do to generate a width * height array of random bytes,
+and thats the warped grid.
+(the gap is still `max_random_offset * 2 + min_width`,
+so in this case `16 + min_width`)
+
+Let's look at this a different way.
+Is it even necessary to store in the grid when vertices/sides are absent?
+What if the grid is just used to generate starting lines,
+and then they are converted into another form,
+such as an array of polygon-pointers like I was originally thinking.
+That would take up much more space than a grid thing, probably,
+but it could include the existence of lines more easily.
+
+...
