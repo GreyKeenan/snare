@@ -31,6 +31,9 @@ int Chalk_randomPoints_cvpoly(
 	}
 
 	unsigned int *triangle_areas = malloc(sizeof(int) * (vertices - 2));
+	if (triangle_areas == NULL) {
+		return 4;
+	}
 
 	//a triangle is (poly[0],poly[index],poly[index-1]) where index > 1
 		//its area is areas[index - 2]
@@ -47,16 +50,17 @@ int Chalk_randomPoints_cvpoly(
 	for (unsigned int i_p = 0; i_p < points; ++i_p) {
 		r = Bagel_xorshiftr128plus_run(randomizer) % total_weight;
 
-		for (unsigned int i_t = 2; i_t < vertices - 2; ++i_t) {
+		for (unsigned int i_t = 2; i_t < vertices; ++i_t) {
 			if (r < triangle_areas[i_t - 2]) {
 				destination[i_p] = Chalk_randomPointInTriangle(
 					poly[0], poly[i_t], poly[i_t - 1],
 					sqrt(Bagel_zeroThroughOne(Bagel_xorshiftr128plus_run(randomizer))),
 					Bagel_zeroThroughOne(Bagel_xorshiftr128plus_run(randomizer))
 				);
+
 				break;
 			}
-			r -= triangle_areas[i_t];
+			r -= triangle_areas[i_t - 2];
 		}
 	}
 
