@@ -58,6 +58,7 @@ gunc:
 		lib_name=gunc \
 		lib_cfiles=" \
 			file_logger.c \
+			list.c \
 		"
 
 chalk:
