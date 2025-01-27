@@ -15,6 +15,13 @@ struct Gunc_List {
 
 int Gunc_List_init(struct Gunc_List *self, size_t item_size, unsigned int initial_allocation);
 int Gunc_List_expand(struct Gunc_List *self);
+static inline void Gunc_List_destroy(struct Gunc_List *self)
+{
+	if (self->data != NULL) {
+		free(self->data);
+	}
+	*self = (struct Gunc_List){ .data = NULL };
+}
 
 static inline int Gunc_List_trim(struct Gunc_List *self)
 {
