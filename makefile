@@ -9,9 +9,10 @@ gccflags= \
 	-Wextra \
 	-iquote .
 
-default: \
+main: \
 	$(src)/libgunc.a \
 	$(src)/libchalk.a \
+	$(src)/libcookie.a \
 	\
 	$(src)/main.c
 	
@@ -30,6 +31,7 @@ default: \
 all:
 	make gunc
 	make chalk
+	make cookie
 	make
 
 run: ./a.out
@@ -67,7 +69,22 @@ chalk:
 		lib_args="-iquote .." \
 		lib_cfiles=" \
 			random.c \
+			compare_point.c \
 		" \
 		lib_links=" \
 			-lm \
+		"
+
+cookie: $(src)/libgunc.a
+	make library \
+		lib_name=cookie \
+		lib_args=" \
+			-iquote .. \
+			-L .. \
+		" \
+		lib_cfiles=" \
+			fortune.c \
+		" \
+		lib_links=" \
+			-l gunc \
 		"

@@ -1,0 +1,22 @@
+default:
+
+gccflags= \
+	-std=c99 \
+	-Wpedantic \
+	-Wall \
+	-Wextra \
+	-iquote . \
+	-iquote ..
+
+test: ./a.out
+	./a.out $(args)
+
+fortune:
+	gcc $(gccflags) \
+		$(args) \
+		tests/fortune.c \
+		fortune.c \
+		\
+		-L .. \
+		-l gunc \
+		-l chalk \
