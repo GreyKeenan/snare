@@ -21,3 +21,10 @@ rpoints:
 		\
 		-lm \
 		-lSDL2
+
+sort:
+	gcc $(gccflags) \
+		$(args) \
+		tests/sort.c \
+		compare_point.c \
+
