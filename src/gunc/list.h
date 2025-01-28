@@ -53,6 +53,22 @@ static inline int Gunc_List_add(struct Gunc_List *self, const void *item)
 	return 0;
 }
 
+static inline int Gunc_List_pop(struct Gunc_List *self, void *nDestination)
+{
+	if (self->length == 0) {
+		return 1;
+	}
+
+	self->length--;
+	if (nDestination == NULL) {
+		return 0;
+	}
+	memcpy(nDestination, self->data + (self->length * self->item_size), self->item_size);
+
+	return 0;
+
+}
+
 static inline void *Gunc_List_access(const struct Gunc_List * self, unsigned int index)
 {
 	if (index >= self->length) {
