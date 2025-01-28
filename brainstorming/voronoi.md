@@ -46,6 +46,10 @@ good fortunes alg sources
 * https://jacquesheunis.com/post/fortunes-algorithm/
 * https://blog.ivank.net/fortunes-algorithm-and-implementation.html
 
+fortune's alg demonstration
+
+* http://www.raymondhill.net/voronoi/rhill-voronoi.html
+
 a rly good delaunay source
 
 * https://ianthehenry.com/posts/delaunay/
