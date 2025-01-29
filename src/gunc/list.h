@@ -15,6 +15,12 @@ enum Gunc_list_error {
 #define Gunc_fit(data, allocation_length, cap) \
 	Gunc_list_fit((data), sizeof(**(data)), (allocation_length), cap)
 
+#define Gunc_gap(data, length, allocation_length, gap_start, gap_length) \
+	Gunc_list_gap((data), sizeof(**(data)), (length), (allocation_length), (gap_start), (gap_length))
+
+#define Gunc_extract(data, length, ext_start, ext_length) \
+	Gunc_list_extract((data), sizeof(**(data)), (length), (ext_start), (ext_length))
+
 #define Gunc_push(data, length, allocation_length, item) \
 	Gunc_list_push((data), sizeof(**(data)), (length), (allocation_length), (item))
 
@@ -31,19 +37,62 @@ static inline int Gunc_list_fit(
 	void *data,
 	size_t item_size,
 	unsigned int *allocation_length,
-	unsigned int cap
+	unsigned int new_allocation_length
 )
 {
-	void *newdata = realloc(*(void**)data, cap * item_size);
+	void *newdata = realloc(*(void**)data, new_allocation_length * item_size);
 	if (newdata == NULL) {
 		return Gunc_list_ALLOCFAIL;
 	}
 
 	*(void**)data = newdata;
-	*allocation_length = cap;
+	*allocation_length = new_allocation_length;
 
 	return 0;
 }
+
+static inline int Gunc_list_gap(
+	void *data, // item**
+	size_t item_size,
+	unsigned int *length,
+	unsigned int *allocation_length,
+	unsigned int gap_start,
+	unsigned int gap_length
+)
+{
+	if (*length + gap_length >= *allocation_length) {
+		int e = Gunc_list_fit(data, item_size, allocation_length, *allocation_length + gap_length);
+		if (e) {
+			return e;
+		}
+	}
+
+	memmove(
+		*(char**)data + ( (gap_start + gap_length) * item_size ),
+		*(char**)data + ( gap_start * item_size ),
+		(*length - gap_start) * item_size
+	);
+	*length += gap_length;
+
+	return 0;
+}
+
+static inline void Gunc_list_extract(
+	const void *data, // item**
+	size_t item_size,
+	unsigned int *length,
+	unsigned int ext_start,
+	unsigned int ext_length
+)
+{
+	memmove(
+		*(char**)data + ( ext_start * item_size ),
+		*(char**)data + ( (ext_start + ext_length) * item_size ),
+		(*length - (ext_start + ext_length)) * item_size
+	);
+	*length -= ext_length;
+}
+
 
 static inline int Gunc_list_push(
 	void *data, // item**
@@ -59,12 +108,6 @@ static inline int Gunc_list_push(
 		if (e) {
 			return e;
 		}
-
-		/*
-		if (*length >= *allocation_length) {
-			return ASSUMES_THIS_WONT_HAPPEN_SINCE_WOULD_BE_EARLIER_ERROR
-		}
-		*/
 	}
 
 	memcpy(*(char**)data + (*length * item_size), item, item_size);

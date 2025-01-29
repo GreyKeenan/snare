@@ -5,23 +5,6 @@
 #include <stdio.h>
 #include <limits.h>
 
-/*
-void printList(struct Gunc_List *list) {
-	fprintf(stderr,
-		"<Gunc_List> %p {"
-		"\n\t""data:%p"
-		"\n\t""length: %u"
-		"\n\t""cap: %u"
-		"\n\t""item_size: %zu"
-		"\n""}",
-		list,
-		list->data,
-		list->length,
-		list->cap,
-		list->item_size
-	);
-}
-*/
 
 int main(const int argc, const char **argv) {
 	(void)argc;
@@ -43,6 +26,8 @@ int main(const int argc, const char **argv) {
 
 	printf("initialized without values!\n");
 	printf("length: %d / allocation: %d\n", length, allocation);
+
+	// push
 
 	for (unsigned int i = 0; i < STATICLEN; ++i) {
 		e = Gunc_push(&arr, &length, &allocation, staticarr + i);
@@ -71,6 +56,42 @@ int main(const int argc, const char **argv) {
 	}
 	printf("\n");
 
+	// gap
+
+	unsigned int gap_start = 3;
+	unsigned int gap_length = 3;
+	e = Gunc_gap(&arr, &length, &allocation, gap_start, gap_length);
+	if (e) {
+		printf("insert failed: %d.\n", e);
+		goto fin;
+	}
+
+	printf("gap created from %d for %d items\n", gap_start, gap_length);
+	printf("length: %d / allocation: %d\n", length, allocation);
+
+	printf("\n""actual array:\n");
+	for (unsigned int i = 0; i < length; ++i) {
+		printf("%d\n", arr[i]);
+	}
+	printf("\n");
+
+	// extract
+
+	unsigned int ext_start = 4;
+	unsigned int ext_length = 2;
+	Gunc_extract(&arr, &length, ext_start, ext_length);
+
+	printf("extracted from %d for %d items\n", ext_start, ext_length);
+	printf("length: %d / allocation: %d\n", length, allocation);
+
+	printf("\n""actual array:\n");
+	for (unsigned int i = 0; i < length; ++i) {
+		printf("%d\n", arr[i]);
+	}
+	printf("\n");
+
+	// pop
+
 	int popped = 0;
 	while (length > 2) {
 		printf("pre-pop: ");
@@ -85,6 +106,8 @@ int main(const int argc, const char **argv) {
 		printf("length: %d / allocation: %d\n", length, allocation);
 		printf("\n");
 	}
+
+	// expand & fit
 
 	e = Gunc_expand(&arr, &allocation);
 	if (e) {
