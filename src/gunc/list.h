@@ -1,93 +1,99 @@
-#ifndef GUNC_List
-#define GUNC_List
+#ifndef GUNC_list
+#define GUNC_list
 
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct Gunc_List {
-	uint8_t *data;
-	unsigned int length;
-	unsigned int cap;
-	size_t item_size;
+enum Gunc_list_error {
+	Gunc_list_MAX = 1
+	, Gunc_list_ALLOCFAIL
 };
 
+#define Gunc_expand(data, allocation_length) \
+	Gunc_list_expand((data), sizeof(**(data)), (allocation_length))
 
-int Gunc_List_init(struct Gunc_List *self, size_t item_size, unsigned int initial_allocation);
-int Gunc_List_expand(struct Gunc_List *self);
-static inline void Gunc_List_destroy(struct Gunc_List *self)
-{
-	if (self->data != NULL) {
-		free(self->data);
-	}
-	*self = (struct Gunc_List){ .data = NULL };
-}
+#define Gunc_fit(data, allocation_length, cap) \
+	Gunc_list_fit((data), sizeof(**(data)), (allocation_length), cap)
 
-static inline int Gunc_List_trim(struct Gunc_List *self)
+#define Gunc_push(data, length, allocation_length, item) \
+	Gunc_list_push((data), sizeof(**(data)), (length), (allocation_length), (item))
+
+#define Gunc_pop(data, length, nItem) \
+	Gunc_list_pop((data), sizeof(**(data)), (length), (nItem))
+
+int Gunc_list_expand(
+	void *data, // item**
+	size_t item_size,
+	unsigned int *allocation_length
+);
+
+static inline int Gunc_list_fit(
+	void *data,
+	size_t item_size,
+	unsigned int *allocation_length,
+	unsigned int cap
+)
 {
-	void *newdata = realloc(self->data, self->length * self->item_size);
+	void *newdata = realloc(*(void**)data, cap * item_size);
 	if (newdata == NULL) {
-			return 2;
+		return Gunc_list_ALLOCFAIL;
 	}
 
-	self->data = newdata;
-	self->cap = self->length;
+	*(void**)data = newdata;
+	*allocation_length = cap;
 
 	return 0;
 }
 
-static inline int Gunc_List_add(struct Gunc_List *self, const void *item)
+static inline int Gunc_list_push(
+	void *data, // item**
+	size_t item_size,
+	unsigned int *length,
+	unsigned int *allocation_length,
+	void *item
+)
 {
-	int e = 0;
-
-	if (self->length >= self->cap) {
-		e = Gunc_List_expand(self);
+	int e;
+	if (*length >= *allocation_length) {
+		e = Gunc_list_expand(data, item_size, allocation_length);
 		if (e) {
-			return 2;
+			return e;
 		}
+
+		/*
+		if (*length >= *allocation_length) {
+			return ASSUMES_THIS_WONT_HAPPEN_SINCE_WOULD_BE_EARLIER_ERROR
+		}
+		*/
 	}
 
-	memcpy(self->data + (self->length * self->item_size), item, self->item_size);
-	self->length++;
+	memcpy(*(char**)data + (*length * item_size), item, item_size);
+	*length += 1;
 
 	return 0;
 }
 
-static inline int Gunc_List_pop(struct Gunc_List *self, void *nDestination)
+static inline int Gunc_list_pop(
+	const void *data, // item**
+	size_t item_size,
+	unsigned int *length,
+	void *nItem
+)
 {
-	if (self->length == 0) {
-		return 1;
+	if (*length == 0) {
+		return Gunc_list_MAX;
 	}
 
-	self->length--;
-	if (nDestination == NULL) {
+	*length -= 1;
+
+	if (nItem == NULL) {
 		return 0;
 	}
-	memcpy(nDestination, self->data + (self->length * self->item_size), self->item_size);
 
-	return 0;
-
-}
-
-static inline void *Gunc_List_access(const struct Gunc_List * self, unsigned int index)
-{
-	if (index >= self->length) {
-		return NULL;
-	}
-	return self->data + (index * self->item_size);
-}
-
-/*
-static inline int Gunc_List_get(const struct Gunc_List *self, unsigned int index, void *item)
-{
-	if (index >= self->length) {
-		return 2;
-	}
-
-	memcpy(item, self->data + (self->length * self->item_size), self->item_size);
+	memcpy(nItem, *(char*const*)data + (*length * item_size), item_size);
 
 	return 0;
 }
-*/
+
 
 #endif

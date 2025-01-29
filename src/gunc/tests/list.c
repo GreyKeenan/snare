@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <limits.h>
 
+/*
 void printList(struct Gunc_List *list) {
 	fprintf(stderr,
 		"<Gunc_List> %p {"
@@ -20,7 +21,7 @@ void printList(struct Gunc_List *list) {
 		list->item_size
 	);
 }
-
+*/
 
 int main(const int argc, const char **argv) {
 	(void)argc;
@@ -28,53 +29,92 @@ int main(const int argc, const char **argv) {
 
 	int e = 0;
 
-	struct Gunc_List list = {0};
-	e = Gunc_List_init(&list, sizeof(int), 0);
+
+	#define STATICLEN (sizeof(staticarr) / sizeof(*staticarr))
+	int staticarr[] = { 1, 2, 3, 4, 5 };
+
+	unsigned int length = 0;
+	unsigned int allocation = STATICLEN;
+	int *arr = malloc(sizeof(int) * allocation);
+	if (arr == NULL) {
+		printf("allocation failed\n");
+		return 1;
+	}
+
+	printf("initialized without values!\n");
+	printf("length: %d / allocation: %d\n", length, allocation);
+
+	for (unsigned int i = 0; i < STATICLEN; ++i) {
+		e = Gunc_push(&arr, &length, &allocation, staticarr + i);
+		if (e) {
+			printf("push() #%d failed: %d\n", i, e);
+			goto fin;
+		}
+	}
+
+	printf("%zu values entered.\n", STATICLEN);
+	printf("length: %d / allocation: %d\n", length, allocation);
+
+	int n = 50;
+	e = Gunc_push(&arr, &length, &allocation, &n);
 	if (e) {
-		fprintf(stderr, "_init() failed: %d\n", e);
+		printf("additional push() failed: %d\n", e);
 		goto fin;
 	}
+	
+	printf("additional push() completed. index %zu should == %d\n", STATICLEN, n);
+	printf("length: %d / allocation: %d\n", length, allocation);
 
-	printList(&list);
-	fprintf(stderr, "\n");
+	printf("\n""actual array:\n");
+	for (unsigned int i = 0; i < length; ++i) {
+		printf("%d\n", arr[i]);
+	}
+	printf("\n");
 
-	int i = 556;
-	e = Gunc_List_add(&list, &i);
+	int popped = 0;
+	while (length > 2) {
+		printf("pre-pop: ");
+		printf("length: %d / allocation: %d\n", length, allocation);
+		e = Gunc_pop(&arr, &length, &popped);
+		if (e) {
+			e = 0;
+			break;
+		}
+
+		printf("popped: %d\n", popped);
+		printf("length: %d / allocation: %d\n", length, allocation);
+		printf("\n");
+	}
+
+	e = Gunc_expand(&arr, &allocation);
 	if (e) {
-		fprintf(stderr, "_add(%d) failed: %d\n", i, e);
-		goto fin;
+		printf("expand() failed: %d\n", e);
 	}
+	printf("post-expand: ");
+	printf("length: %d / allocation: %d\n", length, allocation);
 
-	printList(&list);
-	fprintf(stderr, "\n");
-
-	int *p = Gunc_List_access(&list, 0);
-	if (p == NULL) {
-		fprintf(stderr, "access( ) failed\n");
-		e = 1;
-		goto fin;
-	}
-	fprintf(stderr, "List[%p]: %d\n", p, *p);
-
-	i = 789;
-	e = Gunc_List_add(&list, &i);
+	e = Gunc_fit(&arr, &allocation, length);
 	if (e) {
-		fprintf(stderr, "_add(%d) failed: %d\n", i, e);
-		goto fin;
+		printf("fit() failed! %d\n", e);
 	}
+	printf("post-fit (length): ");
+	printf("length: %d / allocation: %d\n", length, allocation);
 
-	printList(&list);
-	fprintf(stderr, "\n");
-
-	p = Gunc_List_access(&list, 1);
-	if (p == NULL) {
-		fprintf(stderr, "access( ) failed\n");
-		e = 1;
-		goto fin;
+	#define FIT 13
+	e = Gunc_fit(&arr, &allocation, FIT);
+	if (e) {
+		printf("fit() failed! %d\n", e);
 	}
-	fprintf(stderr, "List[%p]: %d\n", p, *p);
+	printf("post-fit (%d): ", FIT);
+	printf("length: %d / allocation: %d\n", length, allocation);
+
+
+
+
 
 	fin:
+
+	free(arr);
 
 	return (_Bool)e;
 }
