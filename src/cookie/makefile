@@ -20,3 +20,12 @@ fortune:
 		-L .. \
 		-l gunc \
 		-l chalk \
+
+addedge:
+	gcc $(gccflags) \
+		$(args) \
+		tests/addEdge.c \
+		fortune.c \
+		\
+		-L .. \
+		-l gunc \
