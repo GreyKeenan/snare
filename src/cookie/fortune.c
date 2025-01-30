@@ -60,7 +60,7 @@ int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Poin
 			break;
 		}
 		if (nextSite >= site_count) {
-		} else if (edgeQ_length == 0 || sites[nextSite].y > edgeQ[edgeQ_length - 1].y) {
+		} else if (edgeQ_length == 0 || sites[nextSite].x < edgeQ[edgeQ_length - 1].x) {
 
 			e = Cookie_fortune_siteEvent(sites[nextSite]);
 			if (e) {
