@@ -42,7 +42,7 @@ int main(void)
 	//struct Cookie_Voronoi vd = {0};
 	struct Cookie_VoronoiRegion diagram[NITEMS] = {0};
 
-	int e = Cookie_fortune(diagram, arr, NITEMS, border, BORDERLEN);
+	int e = Cookie_fortune(diagram, arr, NITEMS, border[0], border[2]);
 	printf("Cookie_fortune exit status: %d\n", e);
 	if (e) {
 		goto fin;

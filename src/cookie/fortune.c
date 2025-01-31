@@ -1,17 +1,18 @@
-#include <stdio.h>
-
 #include "./fortune.h"
 
 #include "./voronoi.h"
 
 #include "chalk/point.h"
-#include "chalk/compare_point.h"
 
 #include "gunc/list.h"
 
 #include <stddef.h>
-#include <limits.h>
-#include <stdbool.h>
+
+struct Cookie_Sand {
+	unsigned short site_index;
+	struct Chalk_Point *destinations[2];
+	// one per half-edge
+};
 
 
 static inline int Cookie_siteEvent(
@@ -19,7 +20,11 @@ static inline int Cookie_siteEvent(
 
 	struct Chalk_Point **edgeQ,
 	unsigned int *edgeQ_length,
-	unsigned int *edgeQ_allocation
+	unsigned int *edgeQ_allocation,
+
+	struct Cookie_Sand **beachline,
+	unsigned int *beachline_length,
+	unsigned int *beachline_allocation
 
 );
 static inline int Cookie_edgeEvent(
@@ -27,20 +32,27 @@ static inline int Cookie_edgeEvent(
 
 	struct Chalk_Point **edgeQ,
 	unsigned int *edgeQ_length,
-	unsigned int *edgeQ_allocation
+	unsigned int *edgeQ_allocation,
+
+	struct Cookie_Sand **beachline,
+	unsigned int *beachline_length,
+	unsigned int *beachline_allocation
 
 );
+
+static inline _Bool Cookie_Sand_isNull(const struct Cookie_Sand *restrict self)
+{
+	return self->destinations[0] == NULL;
+}
 
 int Cookie_addEdgeEvent(struct Chalk_Point point, struct Chalk_Point **list, unsigned int *length, unsigned int *allocation);
 
 
-int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Point *sites, unsigned short site_count, const struct Chalk_Point *bounds_vertices, unsigned int bounds_vertex_count)
+int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Point *sites, unsigned short site_count, struct Chalk_Point lower_bounds, struct Chalk_Point upper_bounds)
 {
 	if (
 		diagram == NULL || sites == NULL
 			|| site_count < 2
-		|| bounds_vertices == NULL
-			|| bounds_vertex_count < 3
 	) {
 		return Cookie_fortune_INPUTS;
 	}
@@ -57,6 +69,11 @@ int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Poin
 		// edge events
 			// ...
 	// cleanup
+
+
+	unsigned int beachline_length = 0;
+	unsigned int beachline_allocation = site_count * 2;
+	struct Cookie_Sand *beachline = malloc(sizeof(*beachline) * beachline_allocation);
 
 
 	unsigned int edgeQ_length = 0;
@@ -81,7 +98,8 @@ int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Poin
 
 			e = Cookie_siteEvent(
 				sites[nextSite],
-				&edgeQ, &edgeQ_length, &edgeQ_allocation
+				&edgeQ, &edgeQ_length, &edgeQ_allocation,
+				&beachline, &beachline_length, &beachline_allocation
 			);
 			if (e) {
 				e = Cookie_fortune_SITE;
@@ -95,7 +113,8 @@ int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Poin
 		Gunc_pop(&edgeQ, &edgeQ_length, &nextEdge);
 		e = Cookie_edgeEvent(
 			nextEdge,
-			&edgeQ, &edgeQ_length, &edgeQ_allocation
+			&edgeQ, &edgeQ_length, &edgeQ_allocation,
+			&beachline, &beachline_length, &beachline_allocation
 		);
 		if (e) {
 			e = Cookie_fortune_EDGE;
@@ -123,6 +142,9 @@ int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Poin
 	if (edgeQ != NULL) {
 		free(edgeQ);
 	}
+	if (beachline != NULL) {
+		free(beachline);
+	}
 
 
 	return e;
@@ -133,10 +155,20 @@ static inline int Cookie_siteEvent(
 
 	struct Chalk_Point **edgeQ,
 	unsigned int *edgeQ_length,
-	unsigned int *edgeQ_allocation
+	unsigned int *edgeQ_allocation,
+
+	struct Cookie_Sand **beachline,
+	unsigned int *beachline_length,
+	unsigned int *beachline_allocation
 
 )
 {
+
+	// identify position in beachline to insert
+	// insert
+	// add vertices & destinations
+	// check for circle events
+
 	return 1;
 }
 static inline int Cookie_edgeEvent(
@@ -144,7 +176,11 @@ static inline int Cookie_edgeEvent(
 
 	struct Chalk_Point **edgeQ,
 	unsigned int *edgeQ_length,
-	unsigned int *edgeQ_allocation
+	unsigned int *edgeQ_allocation,
+
+	struct Cookie_Sand **beachline,
+	unsigned int *beachline_length,
+	unsigned int *beachline_allocation
 
 )
 {

@@ -12,7 +12,7 @@ enum Cookie_fortune_error {
 	, Cookie_fortune_EDGE
 };
 
-int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Point *sites, unsigned short site_count, const struct Chalk_Point *bounds_vertices, unsigned int bounds_vertex_count);
+int Cookie_fortune(struct Cookie_VoronoiRegion *diagram, const struct Chalk_Point *sites, unsigned short site_count, struct Chalk_Point lower_bounds, struct Chalk_Point upper_bounds);
 /*
 	Constructs a voronoi diagram using Fortune's algorithm.
 
