@@ -1,0 +1,3 @@
+[submodule "subs/gu"]
+	path = subs/gu
+	url = https://github.com/GreyKeenan/gu
