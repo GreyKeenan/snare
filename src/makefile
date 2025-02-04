@@ -14,6 +14,9 @@ cfiles= \
 	main.c
 
 links= \
+	-L . \
+	-l dot \
+	\
 	-L $(guroot) \
 	-l gu \
 
@@ -23,6 +26,7 @@ obdir= objects
 
 dev: \
 	$(guroot)/libgu.a \
+	libdot.a \
 	\
 	main.c
 	
@@ -50,6 +54,7 @@ library: $(lib_requires)
 	&& \
 	gcc $(gccflags) \
 		-c \
+		-iquote .. \
 		\
 		$(lib_args) \
 		\
@@ -65,4 +70,14 @@ library: $(lib_requires)
 # ==========
 
 all:
-	echo TODO
+	make dot
+
+.PHONY: dot
+dot:
+	make library lib_name=dot \
+		lib_cfiles=" \
+			random.c \
+		" \
+		lib_links=" \
+			-lm \
+		"
