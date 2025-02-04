@@ -77,6 +77,7 @@ dot:
 	make library lib_name=dot \
 		lib_cfiles=" \
 			random.c \
+			sort.c \
 		" \
 		lib_links=" \
 			-lm \

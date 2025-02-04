@@ -29,3 +29,12 @@ rpoints:
 		-lm \
 		-lSDL2 \
 		$(lgu)
+
+sort:
+	gcc $(gccflags) \
+		$(args) \
+		\
+		tests/sort.c \
+		sort.c \
+		\
+		$(lgu)
