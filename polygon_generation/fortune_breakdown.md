@@ -1,3 +1,5 @@
+About Fortune's Algorithm
+==================================================
 
 <br>
 
@@ -114,9 +116,9 @@ y(-2l + 2b) =
 :  y = --------------------
 \          (-2l + 2b)
 
-/      (a - x)^2 + bb - ll
+/      (a + -x)^2 + bb + -ll
 :  y = --------------------
-\          2(b - l)
+\          2(b + -l)
 
 The storage size need for this formula at its largest point is
 
