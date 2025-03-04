@@ -9,6 +9,7 @@ initial exploration
   * Spitballing
   * Emerging questions/problems/etc
 * Locking in
+  * Addressing those questions
 
 <br>
 
@@ -210,3 +211,90 @@ It does leave some important questions though:
 * Cohabitation?
   If so, who is hurt by attacks?
 
+
+Addressing those questions
+--------------------------------------------------
+
+### Where do you get troops from?
+
+### How are attacks calculated?
+
+**this doesnt work**
+
+For simplicity & experimentation purposes,
+I want the outcome to be
+purely a function of attack & defense force counts/weights.
+
+~~~
+bool battle(uint8_t *attacker, uint8_t *defender);
+~~~
+
+Then, the calculation can be swapped easily.
+For defense or attack bonuses,
+a multiplier can be applied before calling `battle()`.
+
+**WAIT**
+
+that doesnt work for everything
+because artillery needs to be different.
+
+Unless?
+Maybe the artillery *does* work this way,
+its just that they don't take damage for the losses.
+
+
+### If cohabitation, who is hit?
+
+Maybe troops are placed along a specific edge of the territory.
+When you attack from a given direction, you attack that edge first.
+If you defeat that edge, or if nothing was along that edge,
+you can then proceed to attack *any* other edge.
+(or maybe just adjacent ones? idk.
+
+This is interesting,
+although it means the territory shapes cant be *too* complex/natural.
+
+Also, is this cumbersome?
+Like, will it be annoying to allocate your troops every time?
+
+Also also,
+how does this affect attacking?
+Can you only attack from the edge you started along?
+Maybe you can place troops in the center,
+and they can attack *any* edge but not defend?
+
+How free are you to allocate troops along edges?
+I was thinking it would be any number of troops to any edge,
+but maybe its just 1 unit type to an edge?
+Or maybe just the infantry can do this?
+
+Maybe its out of your control.
+Maybe when infantry enter a territory,
+they are automatically guarding against
+the exactly-opposite edge from the one they entered through.
+Then, when they attack (?or move?),
+they pivot to face whatever direction that was.
+When facing a direction,
+they get a defense bonus & take damage first!
+
+This could be extended to the artillery in a similar way.
+They are placed along the edge they entered *from*.
+If attacked from that direction,
+they get 0 defense.
+
+**hold up!**
+This is quickly getting more complicated.
+For now, lets just say that there is no cohabitation,
+EXCEPT in cities/forts or whatever they are.
+Then, *that* can be the defense bonus of forts!
+Then, in forts, damage goes to
+infantry, then cavalry, then artillery.
+
+
+Misc
+--------------------------------------------------
+
+* If you try to move onto your own unit, they swap places.
+  Unless theyre of the same type.
+  Then they add together, unless theyre at the max,
+  in which case they merge as much as possible then swap.
