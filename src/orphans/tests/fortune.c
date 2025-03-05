@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// #include <limits.h>
 
 
 int main(void)
@@ -32,12 +33,21 @@ int main(void)
 	qsort(arr, LEN, sizeof(*arr), Dot_sort_x_ascending);
 
 
-	struct Orphans_Region diagram[LEN] = {0};
+	struct Orphans_Region regions[LEN] = {0};
+
+	struct Dot * /*heap*/ edges = NULL;
+	unsigned int edges_length = 0;
+	unsigned int edges_allocation = 0;
 
 	struct Dot low = {-10, -10};
 	struct Dot high = {30, 30};
 
-	echo = Orphans_fortune(diagram, arr, LEN, low, high);
+	echo = Orphans_fortune(
+		LEN, arr,
+		low, high,
+		regions,
+		&edges, &edges_length, &edges_allocation
+	);
 	if (echo != NULL) {
 		gu_echo_sneeze(echo);
 		gu_echo_destroy(echo);

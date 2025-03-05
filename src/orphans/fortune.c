@@ -1,7 +1,6 @@
 #include "./fortune.h"
 
 #include "./region.h"
-#include "./sand.h"
 #include "./siteEvent.h"
 #include "./edgeEvent.h"
 
@@ -13,14 +12,19 @@
 
 
 /*heap*/ struct gu_echo *Orphans_fortune(
-	struct Orphans_Region * restrict /*nonull*/ diagram,
-	const struct Dot * restrict /*nonull*/ sites,
 	unsigned int site_count,
-	struct Dot lower_bound, struct Dot upper_bound
+	const struct Dot * restrict /*nonull*/ sites,
+
+	struct Dot lower_bound, struct Dot upper_bound,
+
+	struct Orphans_Region * restrict /*nonull*/ regions,
+	struct Dot * restrict /*heap*/ edges[restrict static 1],
+	unsigned int edges_length[restrict static 1],
+	unsigned int edges_allocation[restrict static 1]
 )
 {
-	if (diagram == NULL || sites == NULL || site_count < 2) {
-		return gu_echo_new(0, "Bad inputs: diagram:%p sites:%p site_count:%u", (void*)diagram, (void*)sites, site_count);
+	if (regions == NULL || sites == NULL || site_count < 2) {
+		return gu_echo_new(0, "Bad inputs: regions:%p sites:%p site_count:%u", (void*)regions, (void*)sites, site_count);
 	}
 
 	// ==========
@@ -38,22 +42,36 @@
 
 	struct gu_echo *e = NULL;
 	unsigned int created_regions = 0;
-	struct Orphans_Sand *beachline = NULL;
-	struct Dot *edgeQ = NULL;
 
+	unsigned int *beachline = NULL;
+	struct Dot *edgeQ = NULL;
+	
 	// ==========
 
 	unsigned int beachline_length = 0;
-	unsigned int beachline_allocation = site_count * 2;
-	//TODO check if can multiply:
+	unsigned int beachline_allocation = site_count;
+	if (beachline_allocation > SIZE_MAX / sizeof(*beachline)) {
+		return gu_echo_new(0, "Beachline allocation failed. Max size:%zu. Attempted:(%zu * %u)", SIZE_MAX, sizeof(*beachline), beachline_allocation);
+	}
 	beachline = malloc(sizeof(*beachline) * beachline_allocation);
 	if (beachline == NULL) {
 		return gu_echo_new(0, "Beachline allocation failed. Attempted size:%zu * allocation:%u", sizeof(*beachline), beachline_allocation);
 	}
+	/*
+		The beachline is an array of unsigned ints.
+		Even (and 0) elements are site-indexes.
+		Odd elements are $edges indexes.
+		before the first element and after the last are implied null $edges indexes.
+
+		this does mean I'll need a specific searching function though :/
+	*/
 
 	unsigned int edgeQ_length = 0;
 	unsigned int edgeQ_allocation = site_count;
-	//TODO check if can multiply:
+	if (edgeQ_allocation > SIZE_MAX / sizeof(*edgeQ)) {
+		e = gu_echo_new(0, "edgeQ allocation failed. Max size:%zu. Attempted:(%zu * %u)", SIZE_MAX, sizeof(*edgeQ), edgeQ_allocation);
+		goto fin;
+	}
 	edgeQ = malloc(sizeof(*edgeQ) * edgeQ_allocation);
 	if (edgeQ == NULL) {
 		e = gu_echo_new(0, "edgeQ allocation failed. Attempted size:%zu * allocation:%u", sizeof(*edgeQ), edgeQ_allocation);
@@ -72,11 +90,12 @@
 		}
 
 		if (next_site >= site_count) {
-		} else if (edgeQ_length == 0 || sites[next_site].x < edgeQ[edgeQ_length - 1].x) {
+		} else if (edgeQ_length == 0 || sites[next_site].y < edgeQ[edgeQ_length - 1].y) {
 			e = Orphans_siteEvent(
 				sites[next_site],
 				&edgeQ, &edgeQ_length, &edgeQ_allocation,
-				&beachline, &beachline_length, &beachline_allocation
+				&beachline, &beachline_length, &beachline_allocation,
+				edges, edges_length, edges_allocation
 			);
 			if (e != NULL) {
 				e = gu_echo_wrap(e, 0, "Orphans_siteEvent() failed.");
@@ -91,7 +110,8 @@
 		e = Orphans_edgeEvent(
 			next_edge,
 			&edgeQ, &edgeQ_length, &edgeQ_allocation,
-			&beachline, &beachline_length, &beachline_allocation
+			&beachline, &beachline_length, &beachline_allocation,
+			edges, edges_length, edges_allocation
 		);
 		if (e != NULL) {
 			e = gu_echo_wrap(e, 0, "Orphans_edgeEvent() failed.");
@@ -107,8 +127,15 @@
 	fin_clean:
 
 	for (unsigned int i = 0; i < created_regions; ++i) {
-		Orphans_Region_reset(diagram + i);
+		Orphans_Region_reset(regions + i);
 	}
+
+	if (*edges != NULL) {
+		free(*edges);
+	}
+	*edges_length = 0;
+	*edges_allocation = 0;
+
 
 	fin:
 
