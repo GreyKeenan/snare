@@ -1,7 +1,5 @@
 #include "./beachline.h"
 
-#include "./sand.h"
-
 #include "dot/dot.h"
 
 #include "gu/gu.h"
@@ -66,16 +64,21 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 		gu_sneeze("lower-solution:%lf higher-solution:%lf\n",
 			focus1.x - triangle_b, focus1.x + triangle_b);
 
-		// if defaulting to lower-x, don't need to check the +/-
-		return focus1.x - triangle_b;
+		//return focus1.x - triangle_b;
+		const double triangle_sum_x = focus1.x + triangle_b;
+		const double triangle_difference_x = focus1.x - triangle_b;
+
+		if (a.y > b.y) {
+			return (triangle_sum_x > triangle_difference_x)? triangle_sum_x:triangle_difference_x;
+		}
+		return (triangle_sum_x < triangle_difference_x)? triangle_sum_x:triangle_difference_x;
 	}
 
-	// when there are 2 solutions
-	// the one with the higher 'y' value is the correct breakpoint
-	// TODO: what will the opposite value be when there is only 1 solution?
-		// also: is it possible for rounding errors to create a perpendicular line
-		// which doesn't intersect the parabolas?
-
+	/*
+	TODO: is it possible for the perpendicular line
+	to have < 2 intersections?
+	What about with rounding errors?
+	*/
 	/*
 		mx + b = a(x - h)^2 + k
 		/       2ah + m +/- root( 4a(hm + b - k) + mm )
@@ -123,8 +126,9 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 	);
 	gu_sneeze("difference:(%lf, %lf)\nsum:(%lf, %lf)\n", difference_x, difference_y, sum_x, sum_y);
 
-	if (difference_y > sum_y) {
-		return difference_x;
+
+	if (a.y > b.y) {
+		return (sum_x > difference_x)? sum_x:difference_x;
 	}
-	return sum_x;
+	return (sum_x < difference_x)? sum_x:difference_x;
 }
