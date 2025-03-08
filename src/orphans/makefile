@@ -26,6 +26,20 @@ fortune: ../libdot.a
 		tests/fortune.c \
 		fortune.c \
 		\
+		-lm \
+		-L .. \
+		-l dot \
+		$(lgu)
+
+breakpoint: ../libdot.a
+	gcc $(gccflags) \
+		\
+		$(args) \
+		\
+		tests/breakpoint.c \
+		beachline.c \
+		\
+		-lm \
 		-L .. \
 		-l dot \
 		$(lgu)
