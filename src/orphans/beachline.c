@@ -2,7 +2,7 @@
 
 #include "dot/dot.h"
 
-#include "gu/gu.h"
+//#include "gu/gu.h"
 
 #include <math.h>
 
@@ -11,13 +11,13 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 	const struct Dot focus1 = (a.y == directix)? b:a;
 	const struct Dot focus2 = (a.y == directix)? a:b;
 
-	gu_sneeze("directix:%lf focus1:(%d, %d) focus2(%d, %d)\n", directix, focus1.x, focus1.y, focus2.x, focus2.y);
+	//gu_sneeze("directix:%lf focus1:(%d, %d) focus2(%d, %d)\n", directix, focus1.x, focus1.y, focus2.x, focus2.y);
 
 	if (focus1.y == focus2.y) {
 		// the perpendicular line is vertical
 		// breakpoint x will be a constant, then.
 
-		gu_sneeze("focus y-es are equal.\n");
+		//gu_sneeze("focus y-es are equal.\n");
 
 		return (focus1.x + (double)focus2.x) / 2;
 	}
@@ -45,10 +45,10 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 			I'll default to the lowest-x? This may change. (250307)
 		*/
 
-		gu_sneeze("focus x-es are equal.\n");
+		//gu_sneeze("focus x-es are equal.\n");
 
 		if (focus2.y == directix) {
-			gu_sneeze("a focus lies on the directix.\n");
+			//gu_sneeze("a focus lies on the directix.\n");
 			return focus2.x;
 		}
 
@@ -58,13 +58,14 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 		const double triangle_toroot = triangle_c * triangle_c - triangle_a * triangle_a;
 		const double triangle_b = sqrt( triangle_c * triangle_c - triangle_a * triangle_a );
 
+		/*
 		gu_sneeze("target_y:%lf\n", target_y);
 		gu_sneeze("(%lf)^2 - (%lf)^2 = (root(%lf) = %lf)\n",
 			triangle_c, triangle_a, triangle_toroot, triangle_b);
 		gu_sneeze("lower-solution:%lf higher-solution:%lf\n",
 			focus1.x - triangle_b, focus1.x + triangle_b);
+		*/
 
-		//return focus1.x - triangle_b;
 		const double triangle_sum_x = focus1.x + triangle_b;
 		const double triangle_difference_x = focus1.x - triangle_b;
 
@@ -73,6 +74,8 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 		}
 		return (triangle_sum_x < triangle_difference_x)? triangle_sum_x:triangle_difference_x;
 	}
+
+		// wait, is this even possible?
 
 	/*
 	TODO: is it possible for the perpendicular line
@@ -94,7 +97,7 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 		\                   1/(2p)
 	*/
 
-	const double perpendicular_x = (a.x + b.x) /(double) 2;
+	const double perpendicular_x = (a.x + b.x) /(double) 2; //TODO why did I use 'a' and 'b' here
 	const double perpendicular_y = (a.y + b.y) /(double) 2;
 	const double perpendicular_m = -1 * (a.x - b.x)/(double)(a.y - b.y);
 	const double perpendicular_b = perpendicular_y - perpendicular_m * perpendicular_x;
@@ -114,6 +117,7 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 	const double sum_x = (top1 + top2) / bottom;
 	const double sum_y = perpendicular_m * sum_x + perpendicular_b;
 
+	/*
 	gu_sneeze("neither x nor y were equal.\n");
 	gu_sneeze("perpendicular: %lf = %lf(%lf) + %lf)\n", perpendicular_y, perpendicular_m, perpendicular_x, perpendicular_b);
 	gu_sneeze("parabola: (x - %lf)^2 = 4(%lf)(y - %lf)\n", vertex_h, parabola_p, vertex_k);
@@ -125,10 +129,28 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 		"\n", top1, toroot, top2, bottom
 	);
 	gu_sneeze("difference:(%lf, %lf)\nsum:(%lf, %lf)\n", difference_x, difference_y, sum_x, sum_y);
+	*/
 
 
 	if (a.y > b.y) {
 		return (sum_x > difference_x)? sum_x:difference_x;
 	}
 	return (sum_x < difference_x)? sum_x:difference_x;
+	/*
+	Consider a beachline containing the sites {a, b, a}.
+	This function could be expected to return
+	the leftmost solution when called for (beachline[0], beachline[1]),
+	but also the rightmost solution when called for (beachline[1], beachline[2]).
+	So, either the selection process needs to be left to the caller,
+	or ... I guess the order of sites given to function matters?
+
+	1. identify sites as highest vs lowest
+	1. if the highest site is given first,
+	  take its rightmost collision
+	1. if the highest site is given second,
+	  take its leftmost collision.
+
+	This logic applies to equal x-es too.
+	Equal height is already a special case.
+	*/
 }
