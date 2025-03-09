@@ -1,10 +1,110 @@
 #include "./beachline.h"
 
+#include "./sand.h"
+
 #include "dot/dot.h"
 
 //#include "gu/gu.h"
+#include "gu/echo.h"
+#include "gu/order.h"
 
 #include <math.h>
+
+
+/*heap*/ struct gu_echo *Orphans_beachline_searchbetween(unsigned int * /*nonull*/ position, struct Dot * /*nonull*/ sites, unsigned int key, struct Orphans_sand * /*nonull*/ beachline, unsigned int length)
+{
+	int e = 0;
+	void *context[4] = {&e, sites, beachline, &length};
+
+	size_t at = gu_searchbetween_withcontext(context, &key, beachline, length, (gu_comparer_withcontext*)Orphans_beachline_compare);
+	if (e) {
+		return gu_echo_new(e, "breakpoint calculation resulted in NaN or inf. Failed when checking beachline[%u]:site(%d, %d) to beachline[%u]:site(%d, %d) against key:(%d, %d).",
+			at, sites[beachline[at].site].x, sites[beachline[at].site].y,
+			at + e, sites[beachline[at + e].site].x, sites[beachline[at + e].site].y,
+			sites[key].x, sites[key].y);
+	}
+
+	at -= 1;
+	/*
+		Because of how _beachline_compare() determines equality,
+		the search will always eventually find an equal match.
+		With that in mind, the standard bsearch() function is more appropriate
+		than searchbetween() is. (except for needing the context parameter)
+
+		searchbetween() is trying to find any index where i - 1 <= key.
+		When searchbetween() encounters an exact match, it just returns
+		that index + 1.
+		So, since I always find a match,
+		I'm always 1 above where I want to be.
+
+		adding one is a temporary TODO fix.
+		Options to fix are:
+
+		1. keep this stupid -1 hack
+		2. modify beachline_compare to fit searchbetween()
+		3. modify gu_searchbetween() behavior
+		4. create a gu_bsearch_withcontext() function
+
+		Changing this in gu_searchbetween() is probably the best solution for the future,
+		because I imagine this issue will be relevant in other cases,
+		but it does take the most work since I also have to modify other code which uses it.
+
+		In reality, I should probably do both (2) and (3).
+	*/
+
+	*position = at;
+
+	return NULL;
+}
+
+int Orphans_beachline_compare(void * /*nonull*/ context[static 4], const unsigned int * /*nonull*/ key, const struct Orphans_sand * /*nonull*/ b)
+{
+	/*
+		This is going to be a little unintuitive
+		because the beachline is sorted by *breakpoint*,
+		not by focus/site.
+		In other words, its sorted by a value
+		calculated between each consecutive 2 elements in the list,
+		rather than by a value of the elements.
+
+		For each 'b', I check both of its breakpoints.
+		There's probably a way to do it where I only need to check 1 breakpoint per site, but eh whatever.
+	*/
+	int *pe = context[0];
+	const struct Dot * const sites = context[1];
+	const struct Orphans_sand * const beachline = context[2];
+	const unsigned int beach_length = *(unsigned int *)(context[3]);
+
+	// ==========
+
+	// TODO: is this where I should handle out-of-bounds breakpoints?
+
+	if (b != beachline + beach_length - 1) { // if not the last element
+		const double right_breakpoint = Orphans_breakpoint_x(sites[*key].y, sites[b->site], sites[(b + 1)->site]);
+		if (right_breakpoint != right_breakpoint || right_breakpoint == 1/0.0 || right_breakpoint == -1/0.0) { // NaN or infinities
+			*pe = 1;
+			return 0;
+		}
+
+		if (sites[*key].x > right_breakpoint) {
+			return 1;
+		}
+	}
+
+	if (b != beachline) { // if not the first element
+		const double left_breakpoint = Orphans_breakpoint_x(sites[*key].y, sites[(b-1)->site], sites[b->site]);
+		if (left_breakpoint != left_breakpoint || left_breakpoint == 1/0.0 || left_breakpoint == -1/0.0) { // NaN or infinities
+			*pe = -1;
+			return 0;
+		}
+
+		if (sites[*key].x < left_breakpoint) { // `<=` would technically be more consistent, but also a teeny weeny tiny bit slower in rare cases
+			return -1;
+		}
+	}
+
+	return 0;
+}
 
 double Orphans_breakpoint_x(const double directix, const struct Dot a, const struct Dot b)
 {
@@ -55,7 +155,7 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 		const double target_y = (focus1.y + (double)focus2.y) / 2;
 		const double triangle_c = directix - target_y;
 		const double triangle_a = focus1.y - target_y;
-		const double triangle_toroot = triangle_c * triangle_c - triangle_a * triangle_a;
+		//const double triangle_toroot = triangle_c * triangle_c - triangle_a * triangle_a;
 		const double triangle_b = sqrt( triangle_c * triangle_c - triangle_a * triangle_a );
 
 		/*
@@ -107,15 +207,15 @@ double Orphans_breakpoint_x(const double directix, const struct Dot a, const str
 	const double parabola_p = focus1.y - vertex_k;
 
 	const double top1 = vertex_h / (2 * parabola_p) + perpendicular_m;
-	const double toroot = (vertex_h * perpendicular_m + perpendicular_b - vertex_k) / parabola_p + perpendicular_m * perpendicular_m;
-	const double top2 = sqrt(toroot);
+	//const double toroot = (vertex_h * perpendicular_m + perpendicular_b - vertex_k) / parabola_p + perpendicular_m * perpendicular_m;
+	const double top2 = sqrt( (vertex_h * perpendicular_m + perpendicular_b - vertex_k) / parabola_p + perpendicular_m * perpendicular_m );
 	const double bottom = 1 / (2 * parabola_p);
 
 	const double difference_x = (top1 - top2) / bottom;
-	const double difference_y = perpendicular_m * difference_x + perpendicular_b;
+	//const double difference_y = perpendicular_m * difference_x + perpendicular_b;
 
 	const double sum_x = (top1 + top2) / bottom;
-	const double sum_y = perpendicular_m * sum_x + perpendicular_b;
+	//const double sum_y = perpendicular_m * sum_x + perpendicular_b;
 
 	/*
 	gu_sneeze("neither x nor y were equal.\n");

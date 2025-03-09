@@ -43,3 +43,15 @@ breakpoint: ../libdot.a
 		-L .. \
 		-l dot \
 		$(lgu)
+
+beachsort:
+	gcc $(gccflags) \
+		\
+		$(args) \
+		\
+		tests/beachsort.c \
+		beachline.c \
+		\
+		-lm \
+		$(lgu)
+	
