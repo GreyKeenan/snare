@@ -24,34 +24,6 @@
 			sites[key].x, sites[key].y);
 	}
 
-	at -= 1;
-	/*
-		Because of how _beachline_compare() determines equality,
-		the search will always eventually find an equal match.
-		With that in mind, the standard bsearch() function is more appropriate
-		than searchbetween() is. (except for needing the context parameter)
-
-		searchbetween() is trying to find any index where i - 1 <= key.
-		When searchbetween() encounters an exact match, it just returns
-		that index + 1.
-		So, since I always find a match,
-		I'm always 1 above where I want to be.
-
-		adding one is a temporary TODO fix.
-		Options to fix are:
-
-		1. keep this stupid -1 hack
-		2. modify beachline_compare to fit searchbetween()
-		3. modify gu_searchbetween() behavior
-		4. create a gu_bsearch_withcontext() function
-
-		Changing this in gu_searchbetween() is probably the best solution for the future,
-		because I imagine this issue will be relevant in other cases,
-		but it does take the most work since I also have to modify other code which uses it.
-
-		In reality, I should probably do both (2) and (3).
-	*/
-
 	*position = at;
 
 	return NULL;
