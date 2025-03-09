@@ -39,42 +39,33 @@ int Orphans_beachline_compare(void * /*nonull*/ context[static 4], const unsigne
 		calculated between each consecutive 2 elements in the list,
 		rather than by a value of the elements.
 
-		For each 'b', I check both of its breakpoints.
-		There's probably a way to do it where I only need to check 1 breakpoint per site, but eh whatever.
+		For a given 'b', I check its right-breakpoint.
 	*/
 	int *pe = context[0];
 	const struct Dot * const sites = context[1];
 	const struct Orphans_sand * const beachline = context[2];
-	const unsigned int beach_length = *(unsigned int *)(context[3]);
+	const unsigned int beachline_length = *(unsigned int *)(context[3]);
 
 	// ==========
 
 	// TODO: is this where I should handle out-of-bounds breakpoints?
 
-	if (b != beachline + beach_length - 1) { // if not the last element
-		const double right_breakpoint = Orphans_breakpoint_x(sites[*key].y, sites[b->site], sites[(b + 1)->site]);
-		if (right_breakpoint != right_breakpoint || right_breakpoint == 1/0.0 || right_breakpoint == -1/0.0) { // NaN or infinities
-			*pe = 1;
-			return 0;
-		}
-
-		if (sites[*key].x > right_breakpoint) {
-			return 1;
-		}
+	if (b == beachline + beachline_length - 1) { //is last element
+		return -1;
 	}
 
-	if (b != beachline) { // if not the first element
-		const double left_breakpoint = Orphans_breakpoint_x(sites[*key].y, sites[(b-1)->site], sites[b->site]);
-		if (left_breakpoint != left_breakpoint || left_breakpoint == 1/0.0 || left_breakpoint == -1/0.0) { // NaN or infinities
-			*pe = -1;
-			return 0;
-		}
-
-		if (sites[*key].x < left_breakpoint) { // `<=` would technically be more consistent, but also a teeny weeny tiny bit slower in rare cases
-			return -1;
-		}
+	const double breakpoint = Orphans_breakpoint_x(sites[*key].y, sites[b->site], sites[(b + 1)->site]);
+	if (breakpoint != breakpoint || breakpoint == 1/0.0 || breakpoint == -1/0.0) { // NaN or infinities
+		*pe = 1;
+		return 0;
 	}
 
+	if (sites[*key].x > breakpoint) {
+		return 1;
+	}
+	if (sites[*key].x < breakpoint) {
+		return -1;
+	}
 	return 0;
 }
 
