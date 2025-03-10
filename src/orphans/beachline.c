@@ -11,17 +11,17 @@
 #include <math.h>
 
 
-/*heap*/ struct gu_echo *Orphans_beachline_searchbetween(unsigned int * /*nonull*/ position, struct Dot * /*nonull*/ sites, unsigned int key, struct Orphans_sand * /*nonull*/ beachline, unsigned int length)
+/*heap*/ struct gu_echo *Orphans_beachline_searchbetween(unsigned int * /*nonull*/ position, struct Dot * /*nonull*/ sites, const struct Dot * /*nonull*/ key, struct Orphans_sand * /*nonull*/ beachline, unsigned int length)
 {
 	int e = 0;
-	void *context[4] = {&e, sites, beachline, &length};
+	void *context[4] = {&e, /*const*/ sites, /*const*/ beachline, /*const*/ &length};
 
-	size_t at = gu_searchbetween_withcontext(context, &key, beachline, length, (gu_comparer_withcontext*)Orphans_beachline_compare);
+	size_t at = gu_searchbetween_withcontext(context, key, beachline, length, (gu_comparer_withcontext*)Orphans_beachline_compare);
 	if (e) {
 		return gu_echo_new(e, "breakpoint calculation resulted in NaN or inf. Failed when checking beachline[%u]:site(%d, %d) to beachline[%u]:site(%d, %d) against key:(%d, %d).",
 			at, sites[beachline[at].site].x, sites[beachline[at].site].y,
 			at + e, sites[beachline[at + e].site].x, sites[beachline[at + e].site].y,
-			sites[key].x, sites[key].y);
+			key->x, key->y);
 	}
 
 	*position = at;
@@ -29,7 +29,7 @@
 	return NULL;
 }
 
-int Orphans_beachline_compare(void * /*nonull*/ context[static 4], const unsigned int * /*nonull*/ key, const struct Orphans_sand * /*nonull*/ b)
+int Orphans_beachline_compare(void * /*nonull*/ context[static 4], const struct Dot * /*nonull*/ key, const struct Orphans_sand * /*nonull*/ b)
 {
 	/*
 		This is going to be a little unintuitive
@@ -54,16 +54,16 @@ int Orphans_beachline_compare(void * /*nonull*/ context[static 4], const unsigne
 		return -1;
 	}
 
-	const double breakpoint = Orphans_breakpoint_x(sites[*key].y, sites[b->site], sites[(b + 1)->site]);
+	const double breakpoint = Orphans_breakpoint_x(key->y, sites[b->site], sites[(b + 1)->site]);
 	if (breakpoint != breakpoint || breakpoint == 1/0.0 || breakpoint == -1/0.0) { // NaN or infinities
 		*pe = 1;
 		return 0;
 	}
 
-	if (sites[*key].x > breakpoint) {
+	if (key->x > breakpoint) {
 		return 1;
 	}
-	if (sites[*key].x < breakpoint) {
+	if (key->x < breakpoint) {
 		return -1;
 	}
 	return 0;

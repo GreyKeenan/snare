@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 		keyx = atoi(argv[1]);
 	}
 
-	#define KEY 0
+	#define KEY sites
 	struct Dot sites[] = {
 		(struct Dot){ keyx , 10 }, // the key
 
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	const size_t siteslen = sizeof(sites) / sizeof(*sites);
 	(void)siteslen;
 
-	gu_sneeze("key: (%d, %d)\n", sites[KEY].x, sites[KEY].y);
+	gu_sneeze("key: (%d, %d)\n", KEY->x, KEY->y);
 
 	struct Orphans_sand beach[] = {
 		(struct Orphans_sand){ 1, 0 },
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 	};
 	const size_t beachlen = sizeof(beach) / sizeof(*beach);
 
-	printbeach(sites[KEY].y, sites, beach, beachlen);
+	printbeach(KEY->y, sites, beach, beachlen);
 
 	unsigned int at = 0;
 	/*heap*/ struct gu_echo *echo = Orphans_beachline_searchbetween(&at, sites, KEY, beach, beachlen);

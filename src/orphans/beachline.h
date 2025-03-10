@@ -33,7 +33,7 @@ double Orphans_breakpoint_x(double directix, struct Dot a, struct Dot b);
 	and one of the parabolas.
 */
 
-int Orphans_beachline_compare(void * /*nonull*/ context[static 4], const unsigned int * /*nonull*/ key, const struct Orphans_sand * /*nonull*/ b);
+int Orphans_beachline_compare(void * /*nonull*/ context[static 4], const struct Dot * /*nonull*/ key, const struct Orphans_sand * /*nonull*/ b);
 /*
 	Conforms to `gu_comparer_withcontext` function-typedef.
 	Meant to be used with _beachline_searchbetween to pass the context in.
@@ -60,7 +60,7 @@ int Orphans_beachline_compare(void * /*nonull*/ context[static 4], const unsigne
 	indicating whether the error occured when calculating the left (-1) or right (+1) breakpoint.
 */
 
-/*heap*/ struct gu_echo *Orphans_beachline_searchbetween(unsigned int * /*nonull*/ position, struct Dot * /*nonull*/ sites, unsigned int key, struct Orphans_sand * /*nonull*/ beachline, unsigned int length);
+/*heap*/ struct gu_echo *Orphans_beachline_searchbetween(unsigned int * /*nonull*/ position, struct Dot * /*nonull*/ sites, const struct Dot * /*nonull*/ key, struct Orphans_sand * /*nonull*/ beachline, unsigned int length);
 /*
 	wrapper for searching the beachline
 
