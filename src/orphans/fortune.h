@@ -14,7 +14,7 @@ struct gu_echo;
 	struct Dot lower_bound, struct Dot upper_bound,
 
 	struct Orphans_Region * restrict /*nonull*/ regions,
-	struct Dot * restrict /*heap*/ edges[restrict static 1],
+	struct Dot * /*heap*/ edges[restrict static 1],
 	unsigned int edges_length[restrict static 1],
 	unsigned int edges_allocation[restrict static 1]
 );

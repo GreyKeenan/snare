@@ -3,6 +3,7 @@
 #include "./region.h"
 #include "./siteEvent.h"
 #include "./edgeEvent.h"
+#include "./sand.h"
 
 #include "dot/dot.h"
 
@@ -18,11 +19,18 @@
 	struct Dot lower_bound, struct Dot upper_bound,
 
 	struct Orphans_Region * restrict /*nonull*/ regions,
-	struct Dot * restrict /*heap*/ edges[restrict static 1],
+	struct Dot * /*heap*/ edges[restrict static 1],
 	unsigned int edges_length[restrict static 1],
 	unsigned int edges_allocation[restrict static 1]
 )
 {
+
+	//TODO
+	(void)lower_bound;
+	(void)upper_bound;
+
+	// ==========
+
 	if (regions == NULL || sites == NULL || site_count < 2) {
 		return gu_echo_new(0, "Bad inputs: regions:%p sites:%p site_count:%u", (void*)regions, (void*)sites, site_count);
 	}
@@ -40,11 +48,11 @@
 
 	// ==========
 
-	struct gu_echo *e = NULL;
+	/*heap*/ struct gu_echo *e = NULL;
 	unsigned int created_regions = 0;
 
-	unsigned int *beachline = NULL;
-	struct Dot *edgeQ = NULL;
+	/*heap*/ struct Orphans_sand *beachline = NULL;
+	/*heap*/ struct Dot *edgeQ = NULL;
 	
 	// ==========
 
@@ -92,7 +100,7 @@
 		if (next_site >= site_count) {
 		} else if (edgeQ_length == 0 || sites[next_site].y < edgeQ[edgeQ_length - 1].y) {
 			e = Orphans_siteEvent(
-				sites[next_site],
+				sites, next_site,
 				&edgeQ, &edgeQ_length, &edgeQ_allocation,
 				&beachline, &beachline_length, &beachline_allocation,
 				edges, edges_length, edges_allocation

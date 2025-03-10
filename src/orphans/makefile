@@ -25,6 +25,7 @@ fortune: ../libdot.a
 		\
 		tests/fortune.c \
 		fortune.c \
+		beachline.c \
 		\
 		-lm \
 		-L .. \
