@@ -41,6 +41,7 @@
 	// ==========
 
 	/*heap*/ struct gu_echo *e = NULL;
+	int ie = 0;
 
 	/*heap*/ struct Orphans_sand *beach = NULL;
 	unsigned int beach_length = 0;
@@ -52,28 +53,45 @@
 
 	// ==========
 
-	beach_allocation = site_count;
-	//if (beach_allocation > SIZE_MAX / sizeof(*beach)) {
-	if (sizeof(*beach) > SIZE_MAX / beach_allocation) {
-		e = gu_echo_new(0, "Unable to multiply for beachline allocation. Max size:%zu. Attempted:(%zu * %u)", SIZE_MAX, sizeof(*beach), beach_allocation);
+	// initialize the beachline & circle event queue
+
+	ie = gu_list_fit(&beach, &beach_length, &beach_allocation, site_count);
+	if (ie) {
+		e = gu_echo_new(ie, "fit() for beach failed: %u", site_count);
 		goto fin;
 	}
-	beach = malloc(sizeof(*beach) * beach_allocation);
-	if (beach == NULL) {
-		e = gu_echo_new(0, "initial beachline allocation failed. Attempted:(%zu * %u)", sizeof(*beach), beach_allocation);
+	ie = gu_list_fit(&circles, &circles_length, &circles_allocation, site_count);
+	if (ie) {
+		e = gu_echo_new(ie, "fit() for circles failed: %u", site_count);
 		goto fin;
 	}
 
-	circles_allocation = site_count;
-	//if (circles_allocation > SIZE_MAX / sizeof(*circles)) {
-	if (sizeof(*circles) > SIZE_MAX / circles_allocation) {
-		e = gu_echo_new(0, "unable to multply for circle event queue. Max size:%zu. Attempted:(%zu * %u)", SIZE_MAX, sizeof(*circles), circles_allocation);
-		goto fin;
+	// ==========
+
+	// event-handling functions assume these allocations > 0 for push()
+
+	if (*halves_allocation == 0) {
+		ie = gu_list_fit(halves, halves_length, halves_allocation, site_count);
+		if (ie) {
+			e = gu_echo_new(ie, "fit() for halves failed: %u", site_count);
+			goto fin;
+		}
 	}
-	circles = malloc(sizeof(*circles) * circles_allocation);
-	if (circles == NULL) {
-		e = gu_echo_new(0, "initial circle event queue allocation failed. Attempted:(%zu * %u)", sizeof(*circles), circles_allocation);
-		goto fin;
+
+	if (*edges_allocation == 0) {
+		ie = gu_list_fit(edges, edges_length, edges_allocation, site_count);
+		if (ie) {
+			e = gu_echo_new(ie, "fit() for edges failed: %u", site_count);
+			goto fin;
+		}
+	}
+
+	if (*vertices_allocation == 0) {
+		ie = gu_list_fit(vertices, vertices_length, vertices_allocation, site_count);
+		if (ie) {
+			e = gu_echo_new(ie, "fit() for vertices failed: %u", site_count);
+			goto fin;
+		}
 	}
 
 	// ==========
@@ -118,6 +136,13 @@
 			goto fin;
 		}
 	}
+
+	// ==========
+
+	if (bounds == NULL || bounds_length == 0) {
+		goto fin;
+	}
+	// clip unterminated edges
 
 	// ==========
 
