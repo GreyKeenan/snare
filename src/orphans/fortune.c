@@ -1,6 +1,6 @@
 #include "./fortune.h"
 
-#include "./halfedge.h"
+#include "./half.h"
 #include "./sand.h"
 
 #include "./siteEvent.h"
@@ -17,14 +17,18 @@
 	const struct Dot * /*nonull*/ sites,
 	unsigned int site_count,
 
-	const struct Dot * /*nonull*/ bounds,
+	const struct Dot * bounds,
 	unsigned int bounds_length,
 
 	unsigned int * /*nonull*/ cells,
 
-	/*heap*/ struct Orphans_halfedge *halves[static 1],
+	/*heap*/ struct Orphans_half *halves[static 1],
 	unsigned int halves_length[static 1],
 	unsigned int halves_allocation[static 1],
+
+	/*heap*/ struct Orphans_edge *edges[static 1],
+	unsigned int edges_length[static 1],
+	unsigned int edges_allocation[static 1],
 
 	/*heap*/ struct Dot *vertices[static 1],
 	unsigned int vertices_length[static 1],
@@ -88,6 +92,7 @@
 				&beach, &beach_length, &beach_allocation,
 				&circles, &circles_length, &circles_allocation,
 				halves, halves_length, halves_allocation,
+				edges, edges_length, edges_allocation,
 				vertices, vertices_length, vertices_allocation
 			);
 			if (e != NULL) {
@@ -105,6 +110,7 @@
 				&beach, &beach_length, &beach_allocation,
 				&circles, &circles_length, &circles_allocation,
 				halves, halves_length, halves_allocation,
+				edges, edges_length, edges_allocation,
 				vertices, vertices_length, vertices_allocation
 		);
 		if (e != NULL) {

@@ -4,7 +4,8 @@
 
 #include "dot/sort.h"
 
-struct Orphans_halfedge;
+struct Orphans_half;
+struct Orphans_edge;
 struct Dot;
 struct gu_echo;
 
@@ -19,9 +20,13 @@ struct gu_echo;
 
 	unsigned int * /*nonull*/ cells,
 
-	/*heap*/ struct Orphans_halfedge *halves[static 1],
+	/*heap*/ struct Orphans_half *halves[static 1],
 	unsigned int halves_length[static 1],
 	unsigned int halves_allocation[static 1],
+
+	/*heap*/ struct Orphans_edge *edges[static 1],
+	unsigned int edges_length[static 1],
+	unsigned int edges_allocation[static 1],
 
 	/*heap*/ struct Dot *vertices[static 1],
 	unsigned int vertices_length[static 1],
@@ -53,7 +58,7 @@ struct gu_echo;
 	`halves` and its associated values are a list.
 	`vertices` and its associated values are a list.
 
-	For `halves` and `vertices`,
+	For `halves`,  `edges`, and `vertices`,
 	it is assumed that the input values are already in a valid list configuration,
 	whether initialized or not.
 	If already initialized,

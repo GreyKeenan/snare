@@ -1,6 +1,6 @@
 
 #include "../fortune.h"
-#include "../halfedge.h"
+#include "../half.h"
 
 #include "dot/dot.h"
 #include "dot/sort.h"
@@ -34,9 +34,13 @@ int main(void)
 
 	unsigned int cells[LEN] = {0};
 
-	/*heap*/ struct Orphans_halfedge *halves = NULL;
+	/*heap*/ struct Orphans_half *halves = NULL;
 	unsigned int halves_length = 0;
 	unsigned int halves_allocation = 0;
+
+	/*heap*/ struct Orphans_edge *edges = NULL;
+	unsigned int edges_length = 0;
+	unsigned int edges_allocation = 0;
 
 	/*heap*/ struct Dot *vertices = NULL;
 	unsigned int vertices_length = 0;
@@ -47,6 +51,7 @@ int main(void)
 		NULL, 0,
 		cells,
 		&halves, &halves_length, &halves_allocation,
+		&edges, &edges_length, &edges_allocation,
 		&vertices, &vertices_length, &vertices_allocation
 	);
 	if (echo != NULL) {
@@ -61,8 +66,8 @@ int main(void)
 	fin:
 
 	gu_free(halves);
+	gu_free(edges);
 	gu_free(vertices);
-
 
 	return e;
 }

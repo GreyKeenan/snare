@@ -3,7 +3,7 @@
 
 
 #include "./sand.h"
-#include "./halfedge.h"
+#include "./half.h"
 #include "./beachline.h"
 
 #include "dot/dot.h"
@@ -25,11 +25,15 @@ static inline /*heap*/ struct gu_echo *Orphans_circleEvent(
 	unsigned int circles_length[static 1],
 	unsigned int circles_allocation[static 1],
 
-	/*heap*/ struct Orphans_halfedge * /*nonull*/ halves[static 1],
+	/*heap*/ struct Orphans_half * /*nonull*/ halves[static 1],
 	unsigned int halves_length[static 1],
 	unsigned int halves_allocation[static 1],
 
-	/*heap*/ struct Dot * vertices[static 1],
+	/*heap*/ struct Orphans_edge * /*nonull*/ edges[static 1],
+	unsigned int edges_length[static 1],
+	unsigned int edges_allocation[static 1],
+
+	/*heap*/ struct Dot * /*nonull*/ vertices[static 1],
 	unsigned int vertices_length[static 1],
 	unsigned int vertices_allocation[static 1]
 )
@@ -48,6 +52,9 @@ static inline /*heap*/ struct gu_echo *Orphans_circleEvent(
 	(void)halves;
 	(void)halves_length;
 	(void)halves_allocation;
+	(void)edges;
+	(void)edges_length;
+	(void)edges_allocation;
 	(void)vertices;
 	(void)vertices_length;
 	(void)vertices_allocation;
