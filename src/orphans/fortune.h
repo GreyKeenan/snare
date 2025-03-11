@@ -2,60 +2,68 @@
 #define ORPHANS_fortune
 
 
-struct Orphans_Region;
+#include "dot/sort.h"
+
+struct Orphans_halfedge;
 struct Dot;
 struct gu_echo;
 
+#define Orphans_sortforme Dot_sort_y_ascending
 
 /*heap*/ struct gu_echo *Orphans_fortune(
+	const struct Dot * /*nonull*/ sites,
 	unsigned int site_count,
-	const struct Dot * restrict /*nonull*/ sites,
 
-	struct Dot lower_bound, struct Dot upper_bound,
+	const struct Dot * bounds,
+	unsigned int bounds_length,
 
-	struct Orphans_Region * restrict /*nonull*/ regions,
-	struct Dot * restrict /*heap*/ edges[restrict static 1],
-	unsigned int edges_length[restrict static 1],
-	unsigned int edges_allocation[restrict static 1]
+	unsigned int * /*nonull*/ cells,
+
+	/*heap*/ struct Orphans_halfedge *halves[static 1],
+	unsigned int halves_length[static 1],
+	unsigned int halves_allocation[static 1],
+
+	/*heap*/ struct Dot *vertices[static 1],
+	unsigned int vertices_length[static 1],
+	unsigned int vertices_allocation[static 1]
 );
 /*
 	assumes:
-		site_count > 1
-		sites is sorted by ascending Y
+		`sites` is sorted by ascending y
 
-		lower_bound < sites[n] < upper_bound
+		site_count > 2
+		bounds_length > 2
 
-		*edges = NULL
-		*edges_length = 0
-		*edges_allocation = 0
+		`halves`-list and `vertices`-list are in a valid state, whether initialized or not
 
+	`sites` is a `site_count`-length array.
 
-	Creates a Voronoi Diagram using Fortune's Algorithm.
+	`bounds` is a `bounds_length`-length array
+	defining a polygon that all sites are assumed to fall within.
+	It will be used to clip unterminated voronoi edges.
+	The final bound is assumed to be one end of a line with the first bound.
 
+	If `bounds == NULL` or `bounds_length == 0`,
+	unterminated edges will not be clipped.
 
-	$sites is a $site_count length array
-	which provides the sites to construct the diagram.
+	`cells` is a `site_count`-length array, to be overwritten.
+	It will contain indices for `(*halves)[]`.
+	`cells[x]` will be the index for some half-edge of `site[x]`.
 
-	$lower_bound and $upper_bound define the bounding box of the diagram.
-	All sites are assumed to be within this boundary.
+	`halves` and its associated values are a list.
+	`vertices` and its associated values are a list.
 
-	$regions is a $site_count length array.
-	Created regions will overwrite this memory.
-	*regions may be modified if the function exits with an error,
-	but their allocated memory will be freed in that case.
-	It is the caller's responsibility to free Orphan_Region allocations
-	if the functions exits without an error, though.
+	For `halves` and `vertices`,
+	it is assumed that the input values are already in a valid list configuration,
+	whether initialized or not.
+	If already initialized,
+	the existing elements will not be modified,
+	though their absolute addresses may change from reallocation.
 
-	$edges, $edges_length, and $edges_allocation are a list.
-	It should not be initialized before calling.
-	*($edges) will be freed if the function returns an error,
-	and $edges_length & $edges_allocation will be reset to 0.
-	It is the caller's responsibility to free $edges if
-	the function exits without an error.
+	If the function returns with an error,
+	`halves`, `vertices`, and `cells` may have still been modified.
 
-
-	returns NULL on success or an allocated gu_echo ptr on failure
+	returns NULL on success or a gu_echo on failure.
 */
-
 
 #endif

@@ -3,7 +3,7 @@
 
 struct Orphans_sand {
 	unsigned int site;
-	unsigned int edge;
+	unsigned int vertex;
 };
 
 #endif

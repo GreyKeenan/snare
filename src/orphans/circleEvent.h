@@ -1,5 +1,5 @@
-#ifndef ORPHANS_siteEvent
-#define ORPHANS_siteEvent
+#ifndef ORPHANS_circleEvent
+#define ORPHANS_circleEvent
 
 
 #include "./sand.h"
@@ -11,8 +11,8 @@
 #include "gu/echo.h"
 
 
-static inline /*heap*/ struct gu_echo *Orphans_siteEvent(
-	unsigned int event,
+static inline /*heap*/ struct gu_echo *Orphans_circleEvent(
+	struct Dot event,
 
 	const struct Dot * /*nonull*/ sites,
 	unsigned int * /*nonull*/ cells,
@@ -34,8 +34,6 @@ static inline /*heap*/ struct gu_echo *Orphans_siteEvent(
 	unsigned int vertices_allocation[static 1]
 )
 /*
-	assumes:
-		beach_allocation > 0
 */
 {
 	(void)event;

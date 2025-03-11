@@ -1,6 +1,6 @@
 
 #include "../fortune.h"
-#include "../region.h"
+#include "../halfedge.h"
 
 #include "dot/dot.h"
 #include "dot/sort.h"
@@ -17,10 +17,11 @@
 int main(void)
 {
 
-	struct gu_echo *echo = NULL;
+	int e = 0;
+	/*heap*/ struct gu_echo *echo = NULL;
 
 	#define LEN 7
-	struct Dot arr[LEN] = {
+	struct Dot sites[LEN] = {
 		(struct Dot) {0, 10},
 		(struct Dot) {7, 15},
 		(struct Dot) {9, 3},
@@ -29,32 +30,40 @@ int main(void)
 		(struct Dot) {1, 20},
 		(struct Dot) {4, 7}
 	};
+	qsort(sites, LEN, sizeof(*sites), Orphans_sortforme);
 
-	qsort(arr, LEN, sizeof(*arr), Dot_sort_x_ascending);
+	unsigned int cells[LEN] = {0};
 
+	/*heap*/ struct Orphans_halfedge *halves = NULL;
+	unsigned int halves_length = 0;
+	unsigned int halves_allocation = 0;
 
-	struct Orphans_Region regions[LEN] = {0};
-
-	struct Dot * /*heap*/ edges = NULL;
-	unsigned int edges_length = 0;
-	unsigned int edges_allocation = 0;
-
-	struct Dot low = {-10, -10};
-	struct Dot high = {30, 30};
+	/*heap*/ struct Dot *vertices = NULL;
+	unsigned int vertices_length = 0;
+	unsigned int vertices_allocation = 0;
 
 	echo = Orphans_fortune(
-		LEN, arr,
-		low, high,
-		regions,
-		&edges, &edges_length, &edges_allocation
+		sites, LEN,
+		NULL, 0,
+		cells,
+		&halves, &halves_length, &halves_allocation,
+		&vertices, &vertices_length, &vertices_allocation
 	);
 	if (echo != NULL) {
 		gu_echo_sneeze(echo);
 		gu_echo_destroy(echo);
-		return 1;
+		e = 1;
+		goto fin;
 	}
 	gu_sneeze("fortune() didn't return an error value\n");
 
-	return 0;
+
+	fin:
+
+	gu_free(halves);
+	gu_free(vertices);
+
+
+	return e;
 }
 

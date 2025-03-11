@@ -1,8 +1,10 @@
 #include "./fortune.h"
 
-#include "./region.h"
+#include "./halfedge.h"
+#include "./sand.h"
+
 #include "./siteEvent.h"
-#include "./edgeEvent.h"
+#include "./circleEvent.h"
 
 #include "dot/dot.h"
 
@@ -12,135 +14,112 @@
 
 
 /*heap*/ struct gu_echo *Orphans_fortune(
+	const struct Dot * /*nonull*/ sites,
 	unsigned int site_count,
-	const struct Dot * restrict /*nonull*/ sites,
 
-	struct Dot lower_bound, struct Dot upper_bound,
+	const struct Dot * /*nonull*/ bounds,
+	unsigned int bounds_length,
 
-	struct Orphans_Region * restrict /*nonull*/ regions,
-	struct Dot * restrict /*heap*/ edges[restrict static 1],
-	unsigned int edges_length[restrict static 1],
-	unsigned int edges_allocation[restrict static 1]
+	unsigned int * /*nonull*/ cells,
+
+	/*heap*/ struct Orphans_halfedge *halves[static 1],
+	unsigned int halves_length[static 1],
+	unsigned int halves_allocation[static 1],
+
+	/*heap*/ struct Dot *vertices[static 1],
+	unsigned int vertices_length[static 1],
+	unsigned int vertices_allocation[static 1]
 )
 {
-	if (regions == NULL || sites == NULL || site_count < 2) {
-		return gu_echo_new(0, "Bad inputs: regions:%p sites:%p site_count:%u", (void*)regions, (void*)sites, site_count);
-	}
+	(void)bounds;
+	(void)bounds_length;
 
 	// ==========
 
-	// initialize empty beachline
-	// initialize queue
-	// loop through queue
-		// site events
-			// ...
-		// edge events
-			// ...
-	// cleanup
+	/*heap*/ struct gu_echo *e = NULL;
+
+	/*heap*/ struct Orphans_sand *beach = NULL;
+	unsigned int beach_length = 0;
+	unsigned int beach_allocation = 0;
+
+	/*heap*/ struct Dot *circles = NULL;
+	unsigned int circles_length = 0;
+	unsigned int circles_allocation = 0;
 
 	// ==========
 
-	struct gu_echo *e = NULL;
-	unsigned int created_regions = 0;
-
-	unsigned int *beachline = NULL;
-	struct Dot *edgeQ = NULL;
-	
-	// ==========
-
-	unsigned int beachline_length = 0;
-	unsigned int beachline_allocation = site_count;
-	if (beachline_allocation > SIZE_MAX / sizeof(*beachline)) {
-		return gu_echo_new(0, "Beachline allocation failed. Max size:%zu. Attempted:(%zu * %u)", SIZE_MAX, sizeof(*beachline), beachline_allocation);
-	}
-	beachline = malloc(sizeof(*beachline) * beachline_allocation);
-	if (beachline == NULL) {
-		return gu_echo_new(0, "Beachline allocation failed. Attempted size:%zu * allocation:%u", sizeof(*beachline), beachline_allocation);
-	}
-	/*
-		The beachline is an array of unsigned ints.
-		Even (and 0) elements are site-indexes.
-		Odd elements are $edges indexes.
-		before the first element and after the last are implied null $edges indexes.
-
-		this does mean I'll need a specific searching function though :/
-	*/
-
-	unsigned int edgeQ_length = 0;
-	unsigned int edgeQ_allocation = site_count;
-	if (edgeQ_allocation > SIZE_MAX / sizeof(*edgeQ)) {
-		e = gu_echo_new(0, "edgeQ allocation failed. Max size:%zu. Attempted:(%zu * %u)", SIZE_MAX, sizeof(*edgeQ), edgeQ_allocation);
+	beach_allocation = site_count;
+	//if (beach_allocation > SIZE_MAX / sizeof(*beach)) {
+	if (sizeof(*beach) > SIZE_MAX / beach_allocation) {
+		e = gu_echo_new(0, "Unable to multiply for beachline allocation. Max size:%zu. Attempted:(%zu * %u)", SIZE_MAX, sizeof(*beach), beach_allocation);
 		goto fin;
 	}
-	edgeQ = malloc(sizeof(*edgeQ) * edgeQ_allocation);
-	if (edgeQ == NULL) {
-		e = gu_echo_new(0, "edgeQ allocation failed. Attempted size:%zu * allocation:%u", sizeof(*edgeQ), edgeQ_allocation);
+	beach = malloc(sizeof(*beach) * beach_allocation);
+	if (beach == NULL) {
+		e = gu_echo_new(0, "initial beachline allocation failed. Attempted:(%zu * %u)", sizeof(*beach), beach_allocation);
+		goto fin;
+	}
+
+	circles_allocation = site_count;
+	//if (circles_allocation > SIZE_MAX / sizeof(*circles)) {
+	if (sizeof(*circles) > SIZE_MAX / circles_allocation) {
+		e = gu_echo_new(0, "unable to multply for circle event queue. Max size:%zu. Attempted:(%zu * %u)", SIZE_MAX, sizeof(*circles), circles_allocation);
+		goto fin;
+	}
+	circles = malloc(sizeof(*circles) * circles_allocation);
+	if (circles == NULL) {
+		e = gu_echo_new(0, "initial circle event queue allocation failed. Attempted:(%zu * %u)", sizeof(*circles), circles_allocation);
 		goto fin;
 	}
 
 	// ==========
-
 
 	unsigned int next_site = 0;
-	struct Dot next_edge = {0};
-
+	struct Dot circle_event = {0};
 	while (1) {
-		if (next_site >= site_count && edgeQ_length == 0) {
+		if (next_site >= site_count && circles_length == 0) {
 			break;
 		}
 
 		if (next_site >= site_count) {
-		} else if (edgeQ_length == 0 || sites[next_site].y < edgeQ[edgeQ_length - 1].y) {
+		} else if (circles_length == 0 || sites[next_site].y < circles[circles_length - 1].y) {
 			e = Orphans_siteEvent(
-				sites[next_site],
-				&edgeQ, &edgeQ_length, &edgeQ_allocation,
-				&beachline, &beachline_length, &beachline_allocation,
-				edges, edges_length, edges_allocation
+				next_site, sites, cells,
+				&beach, &beach_length, &beach_allocation,
+				&circles, &circles_length, &circles_allocation,
+				halves, halves_length, halves_allocation,
+				vertices, vertices_length, vertices_allocation
 			);
 			if (e != NULL) {
 				e = gu_echo_wrap(e, 0, "Orphans_siteEvent() failed.");
-				goto fin_clean;
+				goto fin;
 			}
 
 			next_site++;
 			continue;
 		}
 
-		gu_list_pop(&edgeQ, &edgeQ_length, &next_edge);
-		e = Orphans_edgeEvent(
-			next_edge,
-			&edgeQ, &edgeQ_length, &edgeQ_allocation,
-			&beachline, &beachline_length, &beachline_allocation,
-			edges, edges_length, edges_allocation
+		gu_list_pop(&circles, &circles_length, &circle_event);
+		e = Orphans_circleEvent(
+				circle_event, sites, cells,
+				&beach, &beach_length, &beach_allocation,
+				&circles, &circles_length, &circles_allocation,
+				halves, halves_length, halves_allocation,
+				vertices, vertices_length, vertices_allocation
 		);
 		if (e != NULL) {
-			e = gu_echo_wrap(e, 0, "Orphans_edgeEvent() failed.");
-			goto fin_clean;
+			e = gu_echo_wrap(e, 0, "Orphans_circleEvent() failed.");
+			goto fin;
 		}
 	}
 
-
 	// ==========
-
-	goto fin;
-
-	fin_clean:
-
-	for (unsigned int i = 0; i < created_regions; ++i) {
-		Orphans_Region_reset(regions + i);
-	}
-
-	if (*edges != NULL) {
-		free(*edges);
-	}
-	*edges_length = 0;
-	*edges_allocation = 0;
 
 
 	fin:
 
-	gu_free(beachline);
-	gu_free(edgeQ);
+	gu_free(beach);
+	gu_free(circles);
 
 	return e;
 }

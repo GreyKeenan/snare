@@ -18,6 +18,9 @@ double Orphans_breakpoint_x(double directix, struct Dot a, struct Dot b);
 		a.y <= directix
 		b.y <= directix
 		!(a.y == directix && b.y == directix)
+			As long as the beachline is built properly,
+			this can only occur when all sites so far, including the site event, have the same y.
+			I'll want to handle that case separately, because there are *no* breakpoints to calc.
 
 	given 2 points and a horizontal line, (focuses and a directix)
 	with both points below that line,
