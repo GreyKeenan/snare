@@ -30,4 +30,14 @@ comp:
 		-lm \
 		$(lgu)
 
-
+beachsort:
+	gcc $(gccflags) \
+		\
+		$(args) \
+		\
+		tests/beachsort.c \
+		beach.c \
+		breakpoint.c \
+		\
+		-lm \
+		$(lgu)
