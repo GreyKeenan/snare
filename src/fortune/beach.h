@@ -6,6 +6,8 @@
 
 #include "gu/gu.h"
 
+#include <stdint.h>
+
 // ==========
 
 #define Fortune_beach_KEYLENGTH 4
@@ -23,7 +25,7 @@ struct Fortune_beach {
 	//breakpoint[x] is the breakpoint before beach[x].
 	//breapoint[x + 1] is the breakpoint after.
 
-	_Bool breakpointsExist;
+	int16_t first_directix;
 };
 
 // ==========

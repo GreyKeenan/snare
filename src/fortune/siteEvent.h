@@ -45,14 +45,15 @@ static inline /*heap*/ struct gu_echo *Fortune_siteEvent(
 	unsigned int * /*nonull*/ circles_allocation
 )
 {
-	
+
 	/*heap*/ struct gu_echo *echo = NULL;
 
 	// ==========
 
 	if (beach->focuses_length == 0) {
+		beach->first_directix = diagram->sites[event_index].y;
 		return Fortune_siteEvent_empty(event_index, diagram, beach);
-	} else if (!beach->breakpointsExist) {
+	} else if (diagram->sites[event_index].y == beach->first_directix) {
 		return Fortune_siteEvent_noBreakpoints(event_index, diagram, beach);
 	}
 
