@@ -22,7 +22,7 @@ struct Fortune_voronoi {
 	//cell[x] corresponds to site[x]
 	//is site_count long
 
-	/*heap*/ struct Dot *vertices;
+	/*heap*/ struct Fortune_point *vertices;
 	unsigned int vertices_length;
 	unsigned int vertices_allocation;
 

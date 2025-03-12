@@ -1,5 +1,8 @@
 #include "./voronoi.h"
 
+#include "./half.h"
+#include "./point.h"
+
 #include "gu/list.h"
 
 #include <stdlib.h>
@@ -12,6 +15,9 @@ int Fortune_voronoi_init(struct Fortune_voronoi self[static 1], struct Fortune_p
 	if (site_count < 2) {
 		return -1;
 	}
+	if (sizeof(*sites) > SIZE_MAX / site_count) {
+		return -2; //this would be crazy though
+	}
 
 	int e = 0;
 
@@ -20,9 +26,9 @@ int Fortune_voronoi_init(struct Fortune_voronoi self[static 1], struct Fortune_p
 		.border = Fortune_INDEX_NULL
 	};
 
-	self->cells = malloc(sizeof(*self->cells), site_count);
+	self->cells = malloc(sizeof(*self->cells) * site_count);
 	if (self->cells == NULL) {
-		e = -2;
+		e = -3;
 		goto fin_err;
 	}
 
@@ -30,34 +36,26 @@ int Fortune_voronoi_init(struct Fortune_voronoi self[static 1], struct Fortune_p
 		self->sites = sites;
 	} else {
 
-		self->sites = malloc(sizeof(*self->cells), site_count);
+		self->sites = malloc(sizeof(*self->cells) * site_count);
 		if (self->sites == NULL) {
 			e = -4;
 			goto fin_err;
 		}
 
-		/*
-		// This can be assumed by malloc succeeding
-		if (sizeof(*sites) > SIZE_MAX / site_count) {
-			e = -3;
-			goto fin_err;
-		}
-		*/
-
 		memcpy(self->sites, sites, sizeof(*sites) * site_count);
 	}
 
-	e = gu_fit(&self->vertices, &self->vertices_length, &self->vertices_allocation, site_count);
+	e = gu_list_fit(&self->vertices, &self->vertices_length, &self->vertices_allocation, site_count);
 	if (e) {
 		e += 1000;
 		goto fin_err;
 	}
-	e = gu_fit(&self->edges, &self->edges_length, &self->edges_allocation, site_count);
+	e = gu_list_fit(&self->edges, &self->edges_length, &self->edges_allocation, site_count);
 	if (e) {
 		e += 2000;
 		goto fin_err;
 	}
-	e = gu_fit(&self->halves, &self->halves_length, &self->halves_allocation, site_count);
+	e = gu_list_fit(&self->halves, &self->halves_length, &self->halves_allocation, site_count);
 	if (e) {
 		e += 3000;
 		goto fin_err;
@@ -68,7 +66,7 @@ int Fortune_voronoi_init(struct Fortune_voronoi self[static 1], struct Fortune_p
 	fin_err:
 
 	if (dontCopySites) {
-		self->sites == NULL;
+		self->sites = NULL;
 	}
 
 	Fortune_voronoi_free(self);
