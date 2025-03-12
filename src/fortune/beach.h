@@ -22,6 +22,8 @@ struct Fortune_beach {
 	unsigned int intersections_allocation;
 	//breakpoint[x] is the breakpoint before beach[x].
 	//breapoint[x + 1] is the breakpoint after.
+
+	_Bool breakpointsExist;
 };
 
 // ==========

@@ -1,5 +1,7 @@
 #include "./algorithm.h"
 
+#include "./siteEvent.h"
+
 #include "./voronoi.h"
 #include "./beach.h"
 
