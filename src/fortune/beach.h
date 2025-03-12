@@ -6,13 +6,13 @@
 
 
 struct Fortune_beach {
-	/*heap*/ unsigned int *parabolas; // indices to sites
-	unsigned int parabolas_length;
-	unsigned int parabolas_allocation;
+	/*heap*/ unsigned int *focuses; // indices to sites
+	unsigned int focuses_length;
+	unsigned int focuses_allocation;
 
-	/*heap*/ unsigned int *breakpoints; // indices to vertices
-	unsigned int breakpoints_length;
-	unsigned int breakpoints_allocation;
+	/*heap*/ unsigned int *intersections; // indices to vertices
+	unsigned int intersections_length;
+	unsigned int intersections_allocation;
 	//breakpoint[x] is the breakpoint before beach[x].
 	//breapoint[x + 1] is the breakpoint after.
 };
@@ -32,8 +32,8 @@ static inline void Fortune_beach_free(struct Fortune_beach *self)
 		return;
 	}
 
-	gu_free(self->parabolas);
-	gu_free(self->breakpoints);
+	gu_free(self->focuses);
+	gu_free(self->intersections);
 
 	*self = (struct Fortune_beach){0};
 }
