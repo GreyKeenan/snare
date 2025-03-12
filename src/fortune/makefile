@@ -25,7 +25,9 @@ comp:
 		\
 		voronoi.c \
 		beach.c \
+		breakpoint.c \
 		\
+		-lm \
 		$(lgu)
 
 
