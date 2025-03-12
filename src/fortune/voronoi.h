@@ -1,12 +1,16 @@
 #ifndef FORTUNE_voronoi
 #define FORTUNE_voronoi
-
+// ==========
 
 #include "gu/gu.h"
 
 #include <limits.h>
 
-#define Fortune_INDEX_NULL UINT_MAX
+// ==========
+
+#define Fortune_INULL UINT_MAX
+
+// ==========
 
 struct Fortune_point;
 struct Fortune_edge;
@@ -35,6 +39,8 @@ struct Fortune_voronoi {
 	unsigned int halves_allocation;
 	// half[x] and half[x + 1] are 2 sides of the same edge, (starting from 0)
 };
+
+// ==========
 
 int Fortune_voronoi_init(struct Fortune_voronoi self[static 1], struct Fortune_point * /*nonull*/ sites, unsigned int site_count, _Bool dontCopySites);
 /*
@@ -67,4 +73,18 @@ static inline void Fortune_voronoi_free(struct Fortune_voronoi *self)
 	*self = (struct Fortune_voronoi){0};
 }
 
+// ----------
+
+/*heap*/ struct gu_echo *Fortune_voronoi_initializeEdge(struct Fortune_voronoi self[static 1]);
+/*
+	Each edge has 2 associated vertices and 2 half edges
+
+	* the new edge will be `edges[edge_length - 1]`
+	* the new vertices will be `vertices[vertices_length - 2]` and -1
+	* the new halves will be `vertices[vertices_length - 2]` and -1
+
+	returns NULL on success or an allocated echo on failure.
+*/
+
+// ==========
 #endif

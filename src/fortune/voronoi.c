@@ -3,12 +3,14 @@
 #include "./half.h"
 #include "./point.h"
 
+#include "gu/echo.h"
 #include "gu/list.h"
 
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 
+// ==========
 
 int Fortune_voronoi_init(struct Fortune_voronoi self[static 1], struct Fortune_point * /*nonull*/ sites, unsigned int site_count, _Bool dontCopySites)
 {
@@ -23,7 +25,7 @@ int Fortune_voronoi_init(struct Fortune_voronoi self[static 1], struct Fortune_p
 
 	*self = (struct Fortune_voronoi){
 		.site_count = site_count,
-		.border = Fortune_INDEX_NULL
+		.border = Fortune_INULL
 	};
 
 	self->cells = malloc(sizeof(*self->cells) * site_count);
@@ -72,4 +74,53 @@ int Fortune_voronoi_init(struct Fortune_voronoi self[static 1], struct Fortune_p
 	Fortune_voronoi_free(self);
 
 	return e;
+}
+
+// ==========
+
+/*heap*/ struct gu_echo *Fortune_voronoi_initializeEdge(struct Fortune_voronoi self[static 1])
+{
+	int e = 0;
+
+	struct Fortune_point dummy_point = {0};
+
+	e = gu_list_push(&self->vertices, &self->vertices_length, &self->vertices_allocation, &dummy_point);
+	if (e) {
+		return gu_echo_new(e, "failed to push() 1/2 vertices");
+	}
+
+	e = gu_list_push(&self->vertices, &self->vertices_length, &self->vertices_allocation, &dummy_point);
+	if (e) {
+		return gu_echo_new(e, "failed to push() 2/2 vertices");
+	}
+
+	struct Fortune_edge dummy_edge = {
+		.head = self->vertices_length - 2,
+		.tail = self->vertices_length - 1
+	};
+
+	e = gu_list_push(&self->edges, &self->edges_length, &self->edges_allocation, &dummy_edge);
+	if (e) {
+		return gu_echo_new(e, "failed to push() new edge");
+	}
+
+	struct Fortune_half dummy_half = {
+		.cell = Fortune_INULL,
+		.previous = self->halves_length, //pointing to itself initially makes later-appending easier
+		.next = self->halves_length,
+		.edge = self->edges_length - 1
+	};
+
+	e = gu_list_push(&self->halves, &self->halves_length, &self->halves_allocation, &dummy_half);
+	if (e) {
+		return gu_echo_new(e, "failed to push() 1/2 halves");
+	}
+
+	e = gu_list_push(&self->halves, &self->halves_length, &self->halves_allocation, &dummy_half);
+	if (e) {
+		return gu_echo_new(e, "failed to push() 1/2 halves");
+	}
+
+
+	return NULL;
 }
