@@ -1,8 +1,9 @@
 #ifndef FORTUNE_algorithm
 #define FORTUNE_algorithm
 
-struct Fortune_voronoi;
-struct Fortune_beach;
+#include "./voronoi.h"
+#include "./beach.h"
+
 struct gu_echo;
 
 /*heap*/ struct gu_echo *Fortune_algorithm(struct Fortune_voronoi diagram[static 1], struct Fortune_beach beach[static 1]);
