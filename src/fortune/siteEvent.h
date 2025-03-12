@@ -51,9 +51,13 @@ static inline /*heap*/ struct gu_echo *Fortune_siteEvent(
 	// ==========
 
 	if (beach->focuses_length == 0) {
-		beach->first_directix = diagram->sites[event_index].y;
 		return Fortune_siteEvent_empty(event_index, diagram, beach);
-	} else if (diagram->sites[event_index].y == beach->first_directix) {
+	} else if (diagram->sites[beach->focuses[0]].y == diagram->sites[event_index].y) {
+		/*
+		The first/last elements on the beachline will always have the first directix.
+		If the current event has the same directix, we know the sweepline hasn't moved yet.
+		All the parabolas will be straight lines, so there will be no breakpoints yet.
+		*/
 		return Fortune_siteEvent_noBreakpoints(event_index, diagram, beach);
 	}
 
