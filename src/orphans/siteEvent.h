@@ -46,29 +46,39 @@ static inline /*heap*/ struct gu_echo *Orphans_siteEvent(
 */
 {
 
-	(void)circles;
-	(void)circles_length;
-	(void)circles_allocation;
-
-	// ==========
-
 	int e = 0;
 	/*heap*/ struct gu_echo *echo = NULL;
+
+	unsigned int at = 0;
+	struct Orphans_sand dummy_sand = { .site = event, .vertex = UINT_MAX };
 
 	// ==========
 
 	// no breakpoints exist
 
-	if (beach_length == 0) {
-	} else if (/*TODO*/1) { // if all focuses & directix are equal
-		//return gu_echo_new(0, "TODO: special cases");
+	if (*beach_length == 0) {
+		(*beach)[0] = dummy_sand;
+		*beach_length += 1;
+		return NULL;
+	}
+
+	if (/*TODO*/1) { // if all focuses & directix are equal
+		at = gu_searchbetween_withcontext(sites, &event, *beach, *beach_length, (gu_comparer_withcontext)Orphans_sand_sort_sitex_ascending);
+		if (at == *beach_length) {
+			e = gu_list_push(beach, beach_length, beach_allocation, &dummy_sand);
+			if (e) {
+				return gu_echo_new(e, "push() for no-breakpoint beach failed.");
+			}
+
+			
+		}
 	}
 
 	// ==========
 
 	// breakpoints exist, so need to bisect a parabola
 
-	unsigned int at = 0;
+	// at = 0;
 	if (*beach_length != 1) {
 		echo = Orphans_beachline_searchbetween(&at, (void*)sites, sites + event, *beach, *beach_length);
 		if (echo != NULL) {
@@ -96,6 +106,9 @@ static inline /*heap*/ struct gu_echo *Orphans_siteEvent(
 	if (e) {
 		return gu_echo_new(e, "unable to push() for 2/2 vertices\nlist:%p length:%u allocation:%u", *vertices, *vertices_length, *vertices_allocation);
 	}
+
+	(*beach)[at].vertex = *vertices_length - 2;
+	(*beach)[at + 1].vertex = *vertices_length - 1;
 
 	// ----------
 
@@ -132,6 +145,16 @@ static inline /*heap*/ struct gu_echo *Orphans_siteEvent(
 	// ==========
 
 	// identify circle events
+
+	echo = Orphans_identifyCircles(
+		at + 1,
+		sites,
+		beach, beach_length, beach_allocation,
+		circles, circles_length, circles_allocation
+	);
+	if (echo != NULL) {
+		// TODO
+	}
 
 	// ==========
 
