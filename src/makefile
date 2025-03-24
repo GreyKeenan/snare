@@ -1,32 +1,24 @@
 default:
 
-guroot= ../subs/gu/src
 
-gccflags= \
-	-std=c99 \
-	-Wpedantic \
-	-Wall \
-	-Wextra \
-	-iquote . \
-	-iquote $(guroot)
+root= .
+include ./share.mk
+
 
 cfiles= \
 	main.c
 
 links= \
-	-L $(guroot) \
-	-l gu \
+	-L $(guroot) -l gu \
 	\
 	-L . \
-
-obdir= objects
+	-l gumetry \
 
 # ==========
 
-dev: \
+dev: $(cfiles) \
 	$(guroot)/libgu.a \
-	\
-	$(cfiles) \
+	libgumetry.a \
 	
 	gcc $(gccflags) \
 		\
@@ -40,30 +32,10 @@ run: a.out
 	./a.out $(args)
 
 clean:
-	rm -rf */objects/*.o
+	rm -rf */$(obdir)/*.o
 	rm -f */a.out
 	rm -f lib*.a
 	rm -f a.out
-
-# ==========
-
-library: $(lib_requires)
-	cd $(lib_name) \
-	&& \
-	gcc $(gccflags) \
-		-c \
-		-iquote .. \
-		\
-		$(lib_args) \
-		\
-		$(lib_cfiles) \
-		\
-		$(lib_links) \
-	&& \
-	mkdir -p $(obdir) \
-	&& \
-	mv *.o $(obdir)
-	ar rcs lib$(lib_name).a $(lib_name)/$(obdir)/*.o
 
 # ==========
 
@@ -71,4 +43,9 @@ gu:
 	cd $(guroot)/gu && make lib
 
 all:
-	make gu
+	make gumetry
+
+
+.PHONY: gumetry
+gumetry:
+	cd gumetry && make lib
