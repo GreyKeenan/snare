@@ -27,6 +27,7 @@ comp:
 		beach.c \
 		breakpoint.c \
 		algorithm.c \
+		identifyCircleEvents.c \
 		\
 		-lm \
 		$(lgu)

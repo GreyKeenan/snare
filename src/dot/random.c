@@ -26,7 +26,7 @@ int Dot_randomDotsInCvpoly(
 				sqrt(Bagel_zeroThroughOne(Bagel_xorshiftr128plus_run(randomizer))),
 				Bagel_zeroThroughOne(Bagel_xorshiftr128plus_run(randomizer))
 			);
-			break;
+			break; //uhh ... why is this here?
 		}
 		return 0;
 	}
