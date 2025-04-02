@@ -2,6 +2,8 @@
 #define ATOLL_coast
 
 
+#include "./point.h"
+
 #include "gu/intlist.h"
 
 
@@ -42,9 +44,6 @@ void atoll_coast_reset(struct atoll_coast *self);
 
 
 void atoll_coast_updateCircleIndices(struct atoll_coast self[static 1], unsigned int from, int by);
-
-static inline double atoll_circle_eventY(struct atoll_circle self)
-{ return self.center.y + radius; }
 
 
 #endif

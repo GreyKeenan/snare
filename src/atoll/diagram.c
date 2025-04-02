@@ -14,9 +14,15 @@ int atoll_diagram_init(
 	bool dontCopySites
 )
 {
-	if (self == NULL || sites == NULL || site_count < 2) return 2;
+	if (self == NULL
+		|| sites == NULL
+		|| site_count < 2
+		|| site_count == UINT_MAX
+	) return 2;
 
+#if UINT_MAX > SIZE_MAX / 4
 	if (site_count + 1 > SIZE_MAX / sizeof(struct atoll_point)) return 3;
+#endif
 
 	*self = (struct atoll_diagram) {
 		.site_count = site_count
@@ -56,7 +62,7 @@ int atoll_diagram_init(
 	return e;
 	fin_err:
 	if (dontCopySites) self->sites = NULL;
-	atoll_diagram_reset(self)
+	atoll_diagram_reset(self);
 	return e;
 }
 
@@ -64,10 +70,10 @@ void atoll_diagram_reset(struct atoll_diagram *self)
 {
 	if (self == NULL) return;
 
-	gu_free(sites);
-	gu_free(cells);
-	gu_free(vertices);
-	gu_free(hedges);
+	gu_free(self->sites);
+	gu_free(self->cells);
+	gu_free(self->vertices);
+	gu_free(self->hedges);
 
 	*self = (struct atoll_diagram){0};
 }
@@ -89,8 +95,8 @@ static inline void atoll_diagram_newhedge(struct atoll_diagram self[static 1], u
 		.head = atoll_INDULL,
 		.tail = atoll_INDULL
 	};
-	if (diagram->cells[cell] == atoll_INDULL) {
-		diagram->cells[cell] = self->hedges_length;
+	if (self->cells[cell] == atoll_INDULL) {
+		self->cells[cell] = self->hedges_length;
 	} else {
 		atoll_hedge_append(self->hedges, self->cells[cell], self->hedges_length);
 	}

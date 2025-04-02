@@ -49,3 +49,7 @@ all:
 .PHONY: gumetry
 gumetry:
 	cd gumetry && make lib
+
+.PHONY: atoll
+atoll:
+	cd atoll && make lib

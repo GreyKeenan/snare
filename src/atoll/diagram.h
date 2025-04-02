@@ -2,7 +2,8 @@
 #define ATOLL_diagram
 
 
-#include <stdint.h>
+#include "./point.h"
+
 #include <stdbool.h>
 #include <limits.h>
 
@@ -10,8 +11,6 @@
 #define atoll_INDULL UINT_MAX
 	// index null
 
-
-struct atoll_point { uint16_t x, y; };
 
 struct atoll_hedge {
 	unsigned int previous;
