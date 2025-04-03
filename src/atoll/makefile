@@ -14,6 +14,7 @@ name= atoll
 cfiles= \
 	diagram.c \
 	coast.c \
+	breakpoint.c \
 
 # ==========
 
@@ -29,6 +30,7 @@ testcomp:
 		\
 		-L $(root) -l $(name) \
 		-L $(guroot) -l gu \
+		-lm \
 		$(links)
 
 # ==========
@@ -40,3 +42,5 @@ test: ./a.out
 diagram_init:
 	make testcomp "tf=diagram_init.c"
 
+breakpoint:
+	make testcomp "tf=breakpoint.c"
