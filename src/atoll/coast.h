@@ -46,4 +46,12 @@ void atoll_coast_reset(struct atoll_coast *self);
 void atoll_coast_updateCircleIndices(struct atoll_coast self[static 1], unsigned int from, int by);
 
 
+int atoll_coast_arcAtX(const struct atoll_sand * /*nonull*/ beach, unsigned int beach_length, const struct atoll_point * /*nonull*/ sites, double directix, int16_t x, unsigned int arcidx[static 1]);
+/*
+Assumes breakpoints exist.
+Binary searches the beachline, based on breakpoints,
+the arc which a new site at `x` would bisect.
+*/
+
+
 #endif

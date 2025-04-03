@@ -44,3 +44,6 @@ diagram_init:
 
 breakpoint:
 	make testcomp "tf=breakpoint.c"
+
+beachsort:
+	make testcomp "tf=beachsort.c"
