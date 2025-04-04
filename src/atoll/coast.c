@@ -5,6 +5,8 @@
 
 #include "gu/gu.h"
 #include "gu/order.h"
+#include "gu/intlist.h"
+#include "gu/echo.h"
 
 
 struct atoll_coast_context {
@@ -47,6 +49,58 @@ void atoll_coast_reset(struct atoll_coast *self)
 	gu_free(self->circles);
 
 	*self = (struct atoll_coast){0};
+}
+
+
+/*heap*/ struct gu_echo *atoll_coast_prime(struct atoll_coast coast[static 1], struct atoll_diagram * /*nonull*/ diagram)
+{
+	unsigned int count_aligned = 1;
+	for ( ; count_aligned < diagram->site_count; ++count_aligned) {
+		if (diagram->sites[0].y != diagram->sites[count_aligned].y) break;
+	}
+	
+	coast->nextSite += count_aligned;
+
+	int e = 0;
+
+	unsigned int dummy = 0;
+
+	if (count_aligned == 1) {
+		e = gu_unstable_intlist_push(&coast->foci, &coast->foci_length, &coast->foci_allocation, &dummy);
+		if (e) return gu_echo_new(e, "failed to push() the first foci");
+		return NULL;
+	}
+
+	unsigned int j = 0;
+	for (unsigned int i = 0; i < count_aligned; ++i) {
+
+		j = 0;
+		for ( ; j < i + 1; ++j) { //linear search for where in existing beachline to insert the new focus. Slow but this whole thing is a rare case.
+			if (j == i) break;
+			if (diagram->sites[i].x < diagram->sites[coast->foci[j]].x) break;
+		}
+
+		if (j == i) {
+			e = gu_unstable_intlist_push(&coast->foci, &coast->foci_length, &coast->foci_allocation, &i);
+			if (e) return gu_echo_new(e, "failed to push() foci #%u", i);
+			continue;
+		}
+		
+		e = gu_intlist_pry(&coast->foci, &coast->foci_length, &coast->foci_allocation, j, 1);
+		if (e) return gu_echo_new(e, "failed to pry() foci #%u", i);
+
+		coast->foci[j] = i;
+	}
+	for (unsigned int i = 0; i < count_aligned - 1; ++i) {
+		e = atoll_diagram_newedge(diagram, coast->foci[i], coast->foci[i + 1]);
+		if (e) return gu_echo_new(e, "failed to initialize new half-edges for break #%u", i);
+
+		dummy = i * 2;
+		e = gu_unstable_intlist_push(&coast->breaks, &coast->breaks_length, &coast->breaks_allocation, &dummy);
+		if (e) return gu_echo_new(e, "failed to push() break #%u", i);
+	}
+
+	return NULL;
 }
 
 

@@ -124,6 +124,8 @@ void atoll_DEBUG_coast_sneeze(const struct atoll_coast *self)
 		gu_sneeze("]\n");
 	}
 
+	gu_sneeze("nextSite: %u\n", self->nextSite);
+
 	gu_sneeze("circles_length: %u\n", self->circles_length);
 	gu_sneeze("circles_allocation: %u\n", self->circles_allocation);
 	gu_sneeze("circles: %p\n", (void*)self->circles);

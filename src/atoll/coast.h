@@ -7,6 +7,11 @@
 #include "gu/intlist.h"
 
 
+struct atoll_diagram;
+
+struct gu_echo;
+
+
 struct atoll_sand {
 	unsigned int focus; // site index
 	unsigned int edge;
@@ -31,6 +36,8 @@ struct atoll_coast {
 	unsigned int breaks_length;                 // should always be foci_length - 1
 	unsigned int breaks_allocation;
 
+	unsigned int nextSite;
+
 	/*heap*/ struct atoll_circle * /*nonull*/ circles;
 	unsigned int circles_length;
 	unsigned int circles_allocation;
@@ -42,8 +49,15 @@ int atoll_coast_init(struct atoll_coast self[static 1], unsigned int site_count)
 void atoll_coast_reset(struct atoll_coast *self);
 
 
-void atoll_coast_updateCircleIndices(struct atoll_coast self[static 1], unsigned int from, int by);
+/*heap*/ struct gu_echo *atoll_coast_prime(struct atoll_coast coast[static 1], struct atoll_diagram * /*nonull*/ diagram);
+/*
+MUST Be called before the fortun's alg event-loop.
+Handles the case of adding to beachline when it is empty,
+and the case of horizontally-aligned first `n` sites,
+where there are no breakpoints yet.
+*/
 
+void atoll_coast_updateCircleIndices(struct atoll_coast self[static 1], unsigned int from, int by);
 
 int atoll_coast_arcAtX(const unsigned int * /*nonull*/ foci, unsigned int foci_length, const struct atoll_point * /*nonull*/ sites, double directix, int16_t x, unsigned int arcidx[static 1]);
 /*

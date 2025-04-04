@@ -47,3 +47,6 @@ breakpoint:
 
 beachsort:
 	make testcomp "tf=beachsort.c"
+
+prime:
+	make testcomp "tf=prime.c"
