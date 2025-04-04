@@ -50,3 +50,6 @@ beachsort:
 
 prime:
 	make testcomp "tf=prime.c"
+
+siteEvent:
+	make testcomp "tf=siteEvent.c"
