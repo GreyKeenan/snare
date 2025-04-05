@@ -65,3 +65,7 @@ treasure:
 
 checkCircles:
 	make testcomp "tf=checkCircles.c"
+
+display:
+	make testcomp "tf=display.c" "links= -lSDL2"
+
