@@ -1,6 +1,7 @@
 
 #include "./coast.h"
 #include "./diagram.h"
+#include "./circle.h"
 
 #include "gu/gu.h"
 
@@ -89,9 +90,9 @@ void atoll_DEBUG_circle_sneeze(const struct atoll_circle *self)
 
 	gu_sneeze("{\n");
 
-	gu_sneeze("center: (%d, %d)\n", self->center.x, self->center.y);
+	gu_sneeze("center: (%lf, %lf)\n", self->center.x, self->center.y);
 	gu_sneeze("radius: %lf\n", self->radius);
-	gu_sneeze("closing_arc: %u\n", self->closing_arc);
+	gu_sneeze("arc: %u\n", self->arc);
 
 	gu_sneeze("}\n");
 }

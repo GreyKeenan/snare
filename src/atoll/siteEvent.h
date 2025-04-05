@@ -4,6 +4,7 @@
 
 #include "./diagram.h"
 #include "./coast.h"
+#include "./circle.h"
 
 #include "gu/echo.h"
 #include "gu/intlist.h"
@@ -73,18 +74,21 @@ static inline /*heap*/ struct gu_echo *atoll_siteEvent(
 
 	// assumes foci[at] is unchanged after prying
 	coast->foci[at + 1] = event;
-
 	
 	// update the circle indices-to-foci with the offset from newly added foci
-	atoll_coast_updateCircleIndices(coast, at, 2);
-
+	atoll_coast_updateCircles(coast->circles, coast->circles_length, at, 2);
 
 	// ==========
 
 	// find & add circle events
+	e = atoll_circle_identify(coast, diagram->sites, at, diagram->sites[event].y);
+	if (e) return gu_echo_new(e, "failed when identifying circle events (1/2)");
+
+	e = atoll_circle_identify(coast, diagram->sites, at + 2, diagram->sites[event].y);
+	if (e) return gu_echo_new(e, "failed when identifying circle events (2/2)");
 
 
-	return gu_echo_new(1, "TODO: circle identifications.");
+	return NULL;
 }	
 
 

@@ -15,6 +15,7 @@ cfiles= \
 	diagram.c \
 	coast.c \
 	breakpoint.c \
+	circle.c \
 	math.c \
 
 # ==========

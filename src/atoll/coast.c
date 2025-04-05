@@ -37,6 +37,9 @@ int atoll_coast_init(struct atoll_coast self[static 1], unsigned int site_count)
 	e = gu_intlist_fit(&self->breaks, NULL, &self->breaks_allocation, site_count);
 	if (e) return e + 200;
 
+	e = gu_intlist_fit(&self->circles, NULL, &self->circles_allocation, site_count + 1);
+	if (e) return e + 300;
+
 	return e;
 
 }
@@ -104,17 +107,6 @@ void atoll_coast_reset(struct atoll_coast *self)
 }
 
 
-void atoll_coast_updateCircleIndices(struct atoll_coast self[static 1], unsigned int from, int by)
-{
-	for (unsigned int i = 0; i < self->circles_length; ++i) {
-		if (self->circles[i].closing_arc < from) {
-			continue;
-		}
-		self->circles[i].closing_arc += by;
-	}
-}
-
-
 int atoll_coast_compare(const void * /*nonull*/ vctx, const void * /*nonull*/ vfocus)
 {
 	const struct atoll_coast_context *ctx = vctx;
@@ -157,4 +149,13 @@ int atoll_coast_arcAtX(const unsigned int * /*nonull*/ foci, unsigned int foci_l
 	*arcidx = gu_searchbetween(&ctx, foci, foci_length, &atoll_coast_compare);
 
 	return e;
+}
+
+
+void atoll_coast_updateCircles(struct atoll_circle * /*nonull*/ circles, unsigned int circles_length, unsigned int from, int by)
+{
+	for (unsigned int i = 0; i < circles_length; ++i) {
+		if (circles[i].arc < from) continue;
+		circles[i].arc += by;
+	}
 }
