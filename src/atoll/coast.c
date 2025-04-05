@@ -8,6 +8,8 @@
 #include "gu/intlist.h"
 #include "gu/echo.h"
 
+#include <math.h>
+
 
 struct atoll_coast_context {
 	const unsigned int *beach;
@@ -157,5 +159,21 @@ void atoll_coast_updateCircles(struct atoll_circle * /*nonull*/ circles, unsigne
 	for (unsigned int i = 0; i < circles_length; ++i) {
 		if (circles[i].arc < from) continue;
 		circles[i].arc += by;
+	}
+}
+
+
+void atoll_coast_checkCircles(struct atoll_circle * /*nonull*/ circles[static 1], unsigned int circles_length[static 1], struct atoll_point site)
+{
+	for (unsigned int i = 0; i < (*circles_length); ++i) {
+
+		const double dist = sqrt(
+			(site.x - (*circles)[i].center.x)*(site.x - (*circles)[i].center.x)
+			+ (site.y - (*circles)[i].center.y)*(site.y - (*circles)[i].center.y)
+		);
+		if (dist > (*circles)[i].radius) continue;
+
+		gu_intlist_cut(circles, circles_length, i, 1);
+		i -= 1;
 	}
 }

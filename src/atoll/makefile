@@ -62,3 +62,6 @@ circumcenter:
 
 treasure:
 	make testcomp "tf=treasure.c"
+
+checkCircles:
+	make testcomp "tf=checkCircles.c"
