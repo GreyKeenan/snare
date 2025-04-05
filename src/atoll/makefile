@@ -17,6 +17,7 @@ cfiles= \
 	breakpoint.c \
 	circle.c \
 	math.c \
+	treasure.c \
 
 # ==========
 
@@ -58,3 +59,6 @@ siteEvent:
 
 circumcenter:
 	make testcomp "tf=circumcenter.c"
+
+treasure:
+	make testcomp "tf=treasure.c"
