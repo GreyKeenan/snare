@@ -15,6 +15,7 @@ cfiles= \
 	diagram.c \
 	coast.c \
 	breakpoint.c \
+	math.c \
 
 # ==========
 
@@ -53,3 +54,6 @@ prime:
 
 siteEvent:
 	make testcomp "tf=siteEvent.c"
+
+circumcenter:
+	make testcomp "tf=circumcenter.c"
