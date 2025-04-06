@@ -29,7 +29,9 @@
 
 		if (coast->nextSite >= diagram->site_count) {
 		} else if (coast->circles_length == 0
-			|| diagram->sites[coast->nextSite].y < coast->circles[coast->circles_length - 1].center.y
+			|| diagram->sites[coast->nextSite].y
+			< coast->circles[coast->circles_length - 1].center.y
+			+ coast->circles[coast->circles_length - 1].radius
 		) {
 			// handle site event
 			echo = atoll_siteEvent(diagram, coast, coast->nextSite);
@@ -45,5 +47,5 @@
 
 	}
 
-	return gu_echo_new(1, "TODO");
+	return NULL;
 }

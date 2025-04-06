@@ -13,7 +13,8 @@ double atoll_parabola_y(
 );
 /*
 	for a *vertical* parabola
-	returns infinity when f == d
+	assumes f != d
+
 */
 
 struct atoll_podouble atoll_circumcenter(

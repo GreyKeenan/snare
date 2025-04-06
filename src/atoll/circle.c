@@ -33,6 +33,7 @@ int atoll_circle_identify(struct atoll_coast * /*nonull*/ coast, struct atoll_po
 		// No circumcenter exists, so the arc isnt closing.
 
 	const struct atoll_point middle = sites[coast->foci[arc]];
+	if (directix <= middle.y) return 0;
 	if (cc.y < atoll_parabola_y(cc.x, middle.x, middle.y, directix)) return 0;
 		// circumcenter is behind the beachline, so the arc isnt closing
 
