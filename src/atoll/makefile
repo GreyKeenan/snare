@@ -28,7 +28,7 @@ lib:
 	ar rcs $(root)/lib$(name).a $(obdir)/*.o
 
 testcomp:
-	gcc $(gccflags) $(args) \
+	gcc $(gccflags) -iquote tests $(args) \
 		tests/$(tf) \
 		\
 		-L $(root) -l $(name) \
@@ -69,3 +69,5 @@ checkCircles:
 display:
 	make testcomp "tf=display.c" "links= -lSDL2"
 
+diamond:
+	make testcomp "tf=diamond.c" "links= -lSDL2"
