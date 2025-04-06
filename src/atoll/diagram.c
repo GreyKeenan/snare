@@ -117,3 +117,17 @@ int atoll_diagram_newedge(struct atoll_diagram self[static 1], unsigned int cell
 
 	return 0;
 }
+
+
+int atoll_edge_giveVertex(struct atoll_hedge * /*nonull*/ hedges, unsigned int edge, unsigned int vertidx)
+{
+	if (hedges[edge].head == atoll_INDULL) hedges[edge].head = vertidx;
+	else if (hedges[edge].tail == atoll_INDULL) hedges[edge].tail = vertidx;
+	else return 1;
+
+	if (hedges[edge^1].head == atoll_INDULL) hedges[edge^1].head = vertidx;
+	else if (hedges[edge^1].tail == atoll_INDULL) hedges[edge^1].tail = vertidx;
+	else return 2;
+
+	return 0;
+}

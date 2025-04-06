@@ -73,5 +73,7 @@ int atoll_diagram_newedge(struct atoll_diagram self[static 1], unsigned int cell
 	returns 0 on success
 */
 
+int atoll_edge_giveVertex(struct atoll_hedge * /*nonull*/ hedges, unsigned int edge, unsigned int vertidx);
+
 
 #endif
