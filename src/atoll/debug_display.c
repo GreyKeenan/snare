@@ -4,6 +4,48 @@
 
 #include "SDL2/SDL.h"
 #include <unistd.h>
+#include <stdlib.h>
+
+
+void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
+{ //https://stackoverflow.com/questions/38334081/how-to-draw-circles-arcs-and-vector-graphics-in-sdl
+   const int diameter = (r * 2);
+
+   int x = (r - 1);
+   int y = 0;
+   int tx = 1;
+   int ty = 1;
+   int error = (tx - diameter);
+
+   while (x >= y)
+   {
+      //  Each of the following renders an octant of the circle
+      SDL_RenderDrawPoint(rdr, cx + x, cy - y);
+      SDL_RenderDrawPoint(rdr, cx + x, cy + y);
+      SDL_RenderDrawPoint(rdr, cx - x, cy - y);
+      SDL_RenderDrawPoint(rdr, cx - x, cy + y);
+      SDL_RenderDrawPoint(rdr, cx + y, cy - x);
+      SDL_RenderDrawPoint(rdr, cx + y, cy + x);
+      SDL_RenderDrawPoint(rdr, cx - y, cy - x);
+      SDL_RenderDrawPoint(rdr, cx - y, cy + x);
+
+      if (error <= 0)
+      {
+         ++y;
+         error += ty;
+         ty += 2;
+      }
+
+      if (error > 0)
+      {
+         --x;
+         tx += 2;
+         error += (tx - diameter);
+      }
+   }
+}
+
+
 
 
 /*heap*/ struct gu_echo *atoll_DEBUG_display(struct atoll_diagram diagram[static 1], double scale)
@@ -39,9 +81,14 @@
 
 	// ==========
 
-	e = SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
-	// if (e < 0) { }
 	for (unsigned int i = 0; i < diagram->hedges_length; i += 2) {
+
+		e = SDL_SetRenderDrawColor(renderer,
+			(rand() & 0xff) | 0x08,
+			(rand() & 0xff) | 0x08,
+			(rand() & 0xff) | 0x08,
+			0xff);
+		// if (e < 0) { }
 
 		if (diagram->hedges[i].head == atoll_INDULL
 			|| diagram->hedges[i].tail == atoll_INDULL
@@ -60,12 +107,19 @@
 
 
 
-	e = SDL_SetRenderDrawColor(renderer, 0xff, 0x00, 0x00, 0xff);
+	e = SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
 	// if (e < 0)
 	for (unsigned int i = 0; i < diagram->site_count; ++i) {
+		atoll_DEBUG_drawcircle(renderer,
+			scale * diagram->sites[i].x,
+			scale * diagram->sites[i].y,
+			4
+		);
+		/*
 		e = SDL_RenderDrawPoint(renderer,
 			scale * diagram->sites[i].x,
 			scale * diagram->sites[i].y);
+		*/
 		/*if (e) {
 			echo = gu_echo_new(0, "failed to draw point #%u", i);
 			goto fin;
