@@ -73,8 +73,10 @@ int main(void)
 	// ==========
 
 
+	/*
 	atoll_DEBUG_diagram_sneeze(&d);
 	atoll_DEBUG_coast_sneeze(&c);
+	*/
 
 	echo = atoll_DEBUG_display(&d, 1);
 	if (echo != NULL) {

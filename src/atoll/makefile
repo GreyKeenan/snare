@@ -71,3 +71,6 @@ display:
 
 diamond:
 	make testcomp "tf=diamond.c" "links= -lSDL2"
+
+convergence:
+	make testcomp "tf=convergence.c"
