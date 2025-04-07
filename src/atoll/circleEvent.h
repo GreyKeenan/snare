@@ -33,6 +33,11 @@
 	int e = 0;
 
 
+	atoll_coast_removeCirclesWithArc(&coast->circles, &coast->circles_length, event.arc - 1);
+	atoll_coast_removeCirclesWithArc(&coast->circles, &coast->circles_length, event.arc    );
+	atoll_coast_removeCirclesWithArc(&coast->circles, &coast->circles_length, event.arc + 1);
+
+
 	unsigned int vertidx = diagram->vertices_length;
 	const struct atoll_point vtx = {
 		.x = event.center.x,
@@ -50,12 +55,6 @@
 	gu_intlist_cut(&coast->foci, &coast->foci_length, event.arc, 1);
 	gu_intlist_cut(&coast->breaks, &coast->breaks_length, event.arc - 1, 1);
 
-	//TODO: i think its possible for multiple circle events to exist for a single arc
-	for (unsigned int i = 0; i < coast->circles_length; ++i) {
-		if (coast->circles[i].arc != event.arc) continue;
-		gu_intlist_cut(&coast->circles, &coast->circles_length, i, 1);
-		i -= 1;
-	}
 	atoll_coast_updateCircles(coast->circles, coast->circles_length, event.arc, -1);
 
 	e = atoll_diagram_newedge(diagram, coast->foci[event.arc], coast->foci[event.arc - 1]);

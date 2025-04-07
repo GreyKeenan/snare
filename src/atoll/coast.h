@@ -63,7 +63,7 @@ void atoll_coast_updateCircles(struct atoll_circle * /*nonull*/ circles, unsigne
 	adds `by` to `circle.arc` for each circle where `circle.arc` >= from`.
 */
 
-void atoll_coast_checkCircles(struct atoll_circle * /*nonull*/ circles[static 1], unsigned int circles_length[static 1], struct atoll_point site);
+void atoll_coast_removeCirclesWithArc(struct atoll_circle * /*nonull*/ circles[static 1], unsigned int circles_length[static 1], unsigned int arc);
 
 
 #endif

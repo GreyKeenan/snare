@@ -48,7 +48,7 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 
 
 
-/*heap*/ struct gu_echo *atoll_DEBUG_display(struct atoll_diagram diagram[static 1], double scale)
+/*heap*/ struct gu_echo *atoll_DEBUG_display(struct atoll_diagram diagram[static 1], double scale, double offset)
 {
 
 	int e = 0;
@@ -84,23 +84,30 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 	for (unsigned int i = 0; i < diagram->hedges_length; i += 2) {
 
 		e = SDL_SetRenderDrawColor(renderer,
-			(rand() & 0xff) | 0x08,
-			(rand() & 0xff) | 0x08,
-			(rand() & 0xff) | 0x08,
+			(rand() & 0xff) | 0x20,
+			(rand() & 0xff) | 0x20,
+			(rand() & 0xff) | 0x20,
 			0xff);
 		// if (e < 0) { }
 
 		if (diagram->hedges[i].head == atoll_INDULL
 			|| diagram->hedges[i].tail == atoll_INDULL
 		) {
+
+			atoll_DEBUG_drawcircle(renderer,
+				offset + scale * (diagram->sites[diagram->hedges[i].cell].x + diagram->sites[diagram->hedges[i^1].cell].x) / 2,
+				offset + scale * (diagram->sites[diagram->hedges[i].cell].y + diagram->sites[diagram->hedges[i^1].cell].y) / 2,
+				2
+			);
+
 			continue;
 		}
 
 		e = SDL_RenderDrawLine(renderer,
-			scale * diagram->vertices[diagram->hedges[i].head].x,
-			scale * diagram->vertices[diagram->hedges[i].head].y,
-			scale * diagram->vertices[diagram->hedges[i].tail].x,
-			scale * diagram->vertices[diagram->hedges[i].tail].y
+			offset + scale * diagram->vertices[diagram->hedges[i].head].x,
+			offset + scale * diagram->vertices[diagram->hedges[i].head].y,
+			offset + scale * diagram->vertices[diagram->hedges[i].tail].x,
+			offset + scale * diagram->vertices[diagram->hedges[i].tail].y
 		);
 		// if (e) { }
 	}
@@ -111,8 +118,8 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 	// if (e < 0)
 	for (unsigned int i = 0; i < diagram->site_count; ++i) {
 		atoll_DEBUG_drawcircle(renderer,
-			scale * diagram->sites[i].x,
-			scale * diagram->sites[i].y,
+			offset + scale * diagram->sites[i].x,
+			offset + scale * diagram->sites[i].y,
 			4
 		);
 		/*

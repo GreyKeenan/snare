@@ -163,16 +163,10 @@ void atoll_coast_updateCircles(struct atoll_circle * /*nonull*/ circles, unsigne
 }
 
 
-void atoll_coast_checkCircles(struct atoll_circle * /*nonull*/ circles[static 1], unsigned int circles_length[static 1], struct atoll_point site)
+void atoll_coast_removeCirclesWithArc(struct atoll_circle * /*nonull*/ circles[static 1], unsigned int circles_length[static 1], unsigned int arc)
 {
 	for (unsigned int i = 0; i < (*circles_length); ++i) {
-
-		const double dist = sqrt(
-			(site.x - (*circles)[i].center.x)*(site.x - (*circles)[i].center.x)
-			+ (site.y - (*circles)[i].center.y)*(site.y - (*circles)[i].center.y)
-		);
-		if (dist > (*circles)[i].radius) continue;
-
+		if ((*circles)[i].arc != arc) continue;
 		gu_intlist_cut(circles, circles_length, i, 1);
 		i -= 1;
 	}

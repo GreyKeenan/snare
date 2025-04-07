@@ -36,14 +36,15 @@ static inline /*heap*/ struct gu_echo *atoll_siteEvent(
 	*/
 	// ==========
 
-	atoll_coast_checkCircles(&coast->circles, &coast->circles_length, diagram->sites[event]);
-
-	// ==========
-
 
 	unsigned int at = 0;
 	e = atoll_coast_arcAtX(coast->foci, coast->foci_length, diagram->sites, diagram->sites[event].y, diagram->sites[event].x, &at);
 	if (e) return gu_echo_new(e, "failed to identify parabola to bisect");
+
+
+	if ( !(at == 0 || at == coast->foci_length - 1) ) {
+		atoll_coast_removeCirclesWithArc(&coast->circles, &coast->circles_length, at);
+	}
 
 
 	// add the new breakpoint-edge

@@ -17,6 +17,15 @@ gu_comparer sort;
 int sort(const void *a, const void *b)
 {
 	return ((struct atoll_point*)a)->y - ((struct atoll_point*)b)->y;
+
+	#define A (*(struct atoll_point*)a)
+	#define B (*(struct atoll_point*)b)
+
+	if (A.y == B.y) return A.x - B.x;
+	return A.y - B.y;
+
+	#undef A
+	#undef B
 }
 
 int main(void)
@@ -24,15 +33,25 @@ int main(void)
 	int e = 0;
 	/*heap*/ struct gu_echo *echo = NULL;
 
+	// http://www.raymondhill.net/voronoi/rhill-voronoi.html
+	// 0,0 50,0 50,50 0,50 0,25 25,0 50,25, 25,50 30,20
+		// 200,200 250,200 250,250 200,250 200,225 225,200 250,225, 225,250 230,220
 	struct atoll_point sites[] = {
-		(struct atoll_point) {250, 250},
+		(struct atoll_point) {300, 200},
+
+		(struct atoll_point) {250,500},
+		(struct atoll_point) {500,250},
+		(struct atoll_point) {250,0},
+		(struct atoll_point) {0,250},
 
 		(struct atoll_point) {0,0},
 		(struct atoll_point) {500,0},
 		(struct atoll_point) {0,500},
-		(struct atoll_point) {500,500}
+		(struct atoll_point) {500,500},
+
+		(struct atoll_point) {0} // EXTRA
 	};
-	unsigned int sites_length = sizeof(sites) / sizeof(*sites);
+	unsigned int sites_length = -1 + sizeof(sites) / sizeof(*sites);
 
 	gu_sneeze("sorted sites:\n");
 	gu_qsort(sites, sites_length, sort);
@@ -73,12 +92,7 @@ int main(void)
 	// ==========
 
 
-	/*
-	atoll_DEBUG_diagram_sneeze(&d);
-	atoll_DEBUG_coast_sneeze(&c);
-	*/
-
-	echo = atoll_DEBUG_display(&d, 1, 0);
+	echo = atoll_DEBUG_display(&d, 0.5, 50);
 	if (echo != NULL) {
 		gu_echo_sneeze(echo);
 		gu_echo_destroy(echo);
