@@ -69,14 +69,8 @@ checkCircles:
 display:
 	make testcomp "tf=display.c" "links= -lSDL2"
 
-diamond:
-	make testcomp "tf=diamond.c" "links= -lSDL2"
-
 convergence:
 	make testcomp "tf=convergence.c"
 
-nine:
-	make testcomp "tf=nine.c" "links= -lSDL2"
-
-four:
-	make testcomp "tf=four.c" "links= -lSDL2"
+simple:
+	make testcomp "tf=simple.c" "links= -lSDL2"

@@ -5,6 +5,7 @@
 #include "SDL2/SDL.h"
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
 void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
@@ -47,6 +48,8 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 
 
 
+#define MINCOL 0x80
+#define GRAY 0x60, 0x60, 0x60, 0xff
 
 /*heap*/ struct gu_echo *atoll_DEBUG_display(struct atoll_diagram diagram[static 1], double scale, double offset)
 {
@@ -64,7 +67,8 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 	}
 
 	window = SDL_CreateWindow("hopefully a voronoi diagram",
-		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		//SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		0, 0,
 		500, 500,
 		0 /*flags*/
 	);
@@ -84,9 +88,9 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 	for (unsigned int i = 0; i < diagram->hedges_length; i += 2) {
 
 		e = SDL_SetRenderDrawColor(renderer,
-			(rand() & 0xff) | 0x20,
-			(rand() & 0xff) | 0x20,
-			(rand() & 0xff) | 0x20,
+			(rand() & 0xff) | MINCOL,
+			(rand() & 0xff) | MINCOL,
+			(rand() & 0xff) | MINCOL,
 			0xff);
 		// if (e < 0) { }
 
@@ -97,7 +101,15 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 			atoll_DEBUG_drawcircle(renderer,
 				offset + scale * (diagram->sites[diagram->hedges[i].cell].x + diagram->sites[diagram->hedges[i^1].cell].x) / 2,
 				offset + scale * (diagram->sites[diagram->hedges[i].cell].y + diagram->sites[diagram->hedges[i^1].cell].y) / 2,
-				2
+				3
+			);
+
+			SDL_SetRenderDrawColor(renderer, GRAY);
+			SDL_RenderDrawLine(renderer,
+				offset + scale * diagram->sites[diagram->hedges[i].cell].x,
+				offset + scale * diagram->sites[diagram->hedges[i].cell].y,
+				offset + scale * diagram->sites[diagram->hedges[i^1].cell].x,
+				offset + scale * diagram->sites[diagram->hedges[i^1].cell].y
 			);
 
 			continue;
@@ -114,13 +126,13 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 
 
 
-	e = SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff, 0xff);
+	e = SDL_SetRenderDrawColor(renderer, GRAY);
 	// if (e < 0)
 	for (unsigned int i = 0; i < diagram->site_count; ++i) {
 		atoll_DEBUG_drawcircle(renderer,
 			offset + scale * diagram->sites[i].x,
 			offset + scale * diagram->sites[i].y,
-			4
+			10
 		);
 		/*
 		e = SDL_RenderDrawPoint(renderer,
@@ -135,7 +147,8 @@ void atoll_DEBUG_drawcircle(SDL_Renderer *rdr, int cx, int cy, int r)
 
 
 	SDL_RenderPresent(renderer);
-	sleep(30);
+	e = fgetc(stdin);
+	if (e == EOF) return gu_echo_new(e, "stdin failed");
 
 
 	// ==========
