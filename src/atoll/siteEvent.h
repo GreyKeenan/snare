@@ -27,7 +27,7 @@ static inline /*heap*/ struct gu_echo *atoll_siteEvent(
 
 	// create the new edge
 	const unsigned int newedge = diagram->hedges_length;
-	e = atoll_diagram_newedge(diagram, at, event);
+	e = atoll_diagram_newedge(diagram, coast->foci[at], event);
 	if (e) return gu_echo_new(e, "failed to create the half edges");
 
 	// remove the invalidated circle events
