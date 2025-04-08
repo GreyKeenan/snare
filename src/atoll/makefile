@@ -61,7 +61,7 @@ circumcenter:
 	make testcomp "tf=circumcenter.c"
 
 treasure:
-	make testcomp "tf=treasure.c"
+	make testcomp "tf=treasure.c" "links= -lSDL2 -lgumetry" "args= -iquote $(root)"
 
 checkCircles:
 	make testcomp "tf=checkCircles.c"
