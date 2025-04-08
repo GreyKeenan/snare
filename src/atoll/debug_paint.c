@@ -19,6 +19,7 @@
 #define MINCOL 0x80
 
 #define ARC_C 0x00, 0xff, 0xff, 0xff
+#define CARC_C 0xff, 0x00, 0x00, 0xff
 #define CIRC_C GRAY
 #define DX_C GRAY
 #define HIGH_C 0, 0xff, 0, 0xff
@@ -245,6 +246,43 @@ void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *
 	struct atoll_podouble left = {0};
 	struct atoll_podouble right = {0};
 	for (unsigned int j = 0; j < coast->foci_length; ++j) {
+
+		SDL_SetRenderDrawColor(R, ARC_C);
+		for (unsigned int i = 0; i < coast->circles_length; ++i) {
+			if (coast->circles[i].arc == j) {
+
+				/*
+				left = atoll_breakpoint(
+					*directix,
+					diagram->sites[coast->foci[j - 1]],
+					diagram->sites[coast->foci[j]]
+				);
+				right = atoll_breakpoint(
+					*directix,
+					diagram->sites[coast->foci[j]],
+					diagram->sites[coast->foci[j + 1]]
+				);
+
+				SDL_SetRenderDrawColor(R, 0x00, 0xff, 0x00, 0xff);
+				SDL_RenderDrawLine(R,
+					OFFSET + SCALE * coast->circles[i].center.x,
+					OFFSET + SCALE * coast->circles[i].center.y,
+					OFFSET + SCALE * left.x,
+					OFFSET + SCALE * left.y
+				);
+				SDL_RenderDrawLine(R,
+					OFFSET + SCALE * coast->circles[i].center.x,
+					OFFSET + SCALE * coast->circles[i].center.y,
+					OFFSET + SCALE * right.x,
+					OFFSET + SCALE * right.y
+				);
+				*/
+
+				SDL_SetRenderDrawColor(R, CARC_C);
+				break;
+			}
+		}
+
 		if (j == 0) {
 			left.x = (0.0 - OFFSET) / SCALE;
 		} else {
@@ -252,6 +290,12 @@ void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *
 				*directix,
 				diagram->sites[coast->foci[j - 1]],
 				diagram->sites[coast->foci[j]]
+			);
+
+			atoll_DEBUG_drawcircle(
+				OFFSET + SCALE * left.x,
+				OFFSET + SCALE * left.y,
+				2
 			);
 		}
 		if (j == coast->foci_length - 1) {
@@ -286,7 +330,7 @@ void atoll_DEBUG_drawarc(int dx, int fx, int fy, int left, int right)
 		return;
 	}
 
-	for (int i = left; i < right; i += 1) {
+	for (int i = left + 1; i < right; i += 1) {
 		SDL_RenderDrawPoint(R, i, atoll_parabola_y(i, fx, fy, dx));
 	}
 }

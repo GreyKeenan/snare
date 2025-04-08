@@ -13,7 +13,13 @@
 gu_comparer atoll_circle_compare;
 int atoll_circle_compare(const void * /*nonull*/ va, const void * /*nonull*/ vb)
 {
-	return ((struct atoll_circle*)vb)->center.y - ((struct atoll_circle*)va)->center.y; // higher-y first so can pop lowest-y off of the top
+	#define A (*(struct atoll_circle*)va)
+	#define B (*(struct atoll_circle*)vb)
+	if (A.center.y + A.radius > B.center.y + B.radius) return -1;
+	if (A.center.y + A.radius < B.center.y + B.radius) return  1;
+	#undef A
+	#undef B
+	return 0;
 }
 
 
