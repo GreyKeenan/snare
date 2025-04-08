@@ -125,6 +125,42 @@ int main(int argc, char **argv)
 		(struct atoll_point) {224,347}
 	};
 
+	/*
+	struct atoll_point s_x[] = {
+		//50,40 160,40 90,50 160,50 100,60 110,70 50,70 150,80 70,80
+		(struct atoll_point) {50,40},
+		(struct atoll_point) {160,40},
+		(struct atoll_point) {90,50},
+		(struct atoll_point) {160,50},
+		(struct atoll_point) {100,60},
+		(struct atoll_point) {110,70},
+		(struct atoll_point) {50,70},
+		(struct atoll_point) {150,80},
+		(struct atoll_point) {70,80}
+	};
+	*/
+
+	struct atoll_point s_t[] = {
+		//50,40 160,40 90,50 160,50 100,60 110,70 50,70 150,80 70,80
+		// 20,130 190,140 180,140 120,150 60,180 90,180
+		(struct atoll_point) {50,40},
+		(struct atoll_point) {160,40},
+		(struct atoll_point) {90,50},
+		(struct atoll_point) {160,50},
+		(struct atoll_point) {100,60},
+		(struct atoll_point) {110,70},
+		(struct atoll_point) {50,70},
+		(struct atoll_point) {150,80},
+		(struct atoll_point) {70,80},
+
+		(struct atoll_point) {20,130},
+		(struct atoll_point) {190,140},
+		(struct atoll_point) {180,140},
+		(struct atoll_point) {120,150},
+		(struct atoll_point) {60,180},
+		(struct atoll_point) {90,180}
+	};
+
 
 
 
@@ -154,6 +190,14 @@ int main(int argc, char **argv)
 			case '4':
 				test(s_4, 0.5, 125);
 				break;
+
+			case 'x':
+				(test)(s_t, 14, 2, 25);
+				break;
+			case 't':
+				test(s_t, 2, 25);
+				break;
+
 			default:
 				break;
 		}
