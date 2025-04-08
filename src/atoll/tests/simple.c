@@ -37,6 +37,8 @@ int (test)(struct atoll_point * /*nonull*/ sites, unsigned int length, double sc
 	int e = 0;
 	/*heap*/ struct gu_echo *echo = NULL;
 
+	atoll_DEBUG_setscale(scale, offset);
+
 	gu_sneeze("//////////////////////////////////////////////////\n\n");
 
 	gu_sneeze("sites:\n");;
@@ -73,10 +75,10 @@ int (test)(struct atoll_point * /*nonull*/ sites, unsigned int length, double sc
 
 	#ifdef DEBUGSTEP
 	gu_sneeze("DONE!\n");
-	atoll_DEBUG_paint(&d, NULL, scale, offset);
+	atoll_DEBUG_paint(&d, NULL);
 	#else
 	atoll_DEBUG_initSDL();
-	atoll_DEBUG_paint(&d, NULL, scale, offset);
+	atoll_DEBUG_paint(&d, NULL);
 	atoll_DEBUG_endSDL();
 	#endif
 
@@ -122,6 +124,8 @@ int main(int argc, char **argv)
 		(struct atoll_point) {415,292},
 		(struct atoll_point) {224,347}
 	};
+
+
 
 
 	#ifdef DEBUGSTEP

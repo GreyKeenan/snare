@@ -26,7 +26,7 @@
 
 	while (1) {
 
-		atoll_DEBUG_paint(diagram, coast, 0.5, 50);
+		atoll_DEBUG_paint(diagram, coast);
 
 		if (coast->nextSite >= diagram->site_count && coast->circles_length == 0) {
 			break;

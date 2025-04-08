@@ -28,16 +28,28 @@
 #define R atoll_DEBUG_renderer
 #define W atoll_DEBUG_window
 
+#define SCALE atoll_DEBUG_scale
+#define OFFSET atoll_DEBUG_offset
+
 SDL_Renderer *atoll_DEBUG_renderer = NULL;
 SDL_Window *atoll_DEBUG_window = NULL;
+
+double atoll_DEBUG_scale = 1;
+double atoll_DEBUG_offset = 0;
 
 
 
 void atoll_DEBUG_drawarc(int dx, int fx, int fy, int left, int right);
 void atoll_DEBUG_drawcircle(int cx, int cy, int r);
-int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset);
-void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram, double scale, double offset);
-void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset, double *directix);
+int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram *diagram, struct atoll_coast *coast);
+void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram);
+void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *coast, double *directix);
+
+void atoll_DEBUG_setscale(double scale, double offset)
+{
+	SCALE = scale;
+	OFFSET = offset;
+}
 
 
 int atoll_DEBUG_initSDL(void)
@@ -67,7 +79,7 @@ void atoll_DEBUG_endSDL(void)
 	SDL_Quit();
 }
 
-void atoll_DEBUG_paint(struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset)
+void atoll_DEBUG_paint(struct atoll_diagram *diagram, struct atoll_coast *coast)
 {
 	if (R == NULL || W == NULL) return;
 
@@ -75,10 +87,10 @@ void atoll_DEBUG_paint(struct atoll_diagram *diagram, struct atoll_coast *coast,
 	SDL_RenderClear(R);
 
 	double dx = 0;
-	int directixExists = atoll_DEBUG_paint_highlight(&dx, diagram, coast, scale, offset);
+	int directixExists = atoll_DEBUG_paint_highlight(&dx, diagram, coast);
 
-	atoll_DEBUG_paint_diagram(diagram, scale, offset);
-	atoll_DEBUG_paint_coast(diagram, coast, scale, offset,
+	atoll_DEBUG_paint_diagram(diagram);
+	atoll_DEBUG_paint_coast(diagram, coast,
 		directixExists? &dx:NULL
 	);
 
@@ -88,7 +100,7 @@ void atoll_DEBUG_paint(struct atoll_diagram *diagram, struct atoll_coast *coast,
 	if (atoll_DEBUG_wait() == EOF) exit(0);
 }
 
-int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset)
+int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram *diagram, struct atoll_coast *coast)
 {
 	if (coast == NULL || diagram == NULL) return 0;
 	if (coast->nextSite >= diagram->site_count && coast->circles_length == 0) {
@@ -105,14 +117,14 @@ int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram 
 
 		SDL_RenderDrawLine(R,
 			0,
-			offset + scale * (*directix),
+			OFFSET + SCALE * (*directix),
 			500,
-			offset + scale * (*directix)
+			OFFSET + SCALE * (*directix)
 		);
 		SDL_SetRenderDrawColor(R, HIGH_C);
 		atoll_DEBUG_drawcircle(
-			offset + scale * diagram->sites[coast->nextSite].x,
-			offset + scale * diagram->sites[coast->nextSite].y,
+			OFFSET + SCALE * diagram->sites[coast->nextSite].x,
+			OFFSET + SCALE * diagram->sites[coast->nextSite].y,
 			9
 		);
 		
@@ -124,24 +136,24 @@ int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram 
 
 	SDL_RenderDrawLine(R,
 		0,
-		offset + scale * (*directix),
+		OFFSET + SCALE * (*directix),
 		500,
-		offset + scale * (*directix)
+		OFFSET + SCALE * (*directix)
 	);
 	SDL_SetRenderDrawColor(R, HIGH_C);
 	//atoll_DEBUG_drawcircle(
-	//	offset + scale * coast->circles[coast->circles_length - 1].center.x,
-	//	offset + scale * coast->circles[coast->circles_length - 1].center.y,
-	//	scale * coast->circles[coast->circles_length - 1].radius
+	//	OFFSET + SCALE * coast->circles[coast->circles_length - 1].center.x,
+	//	OFFSET + SCALE * coast->circles[coast->circles_length - 1].center.y,
+	//	SCALE * coast->circles[coast->circles_length - 1].radius
 	//);
 	atoll_DEBUG_drawcircle(
-		offset + scale * coast->circles[coast->circles_length - 1].center.x,
-		offset + scale * coast->circles[coast->circles_length - 1].center.y,
+		OFFSET + SCALE * coast->circles[coast->circles_length - 1].center.x,
+		OFFSET + SCALE * coast->circles[coast->circles_length - 1].center.y,
 		4
 	);
 	atoll_DEBUG_drawcircle(
-		offset + scale * coast->circles[coast->circles_length - 1].center.x,
-		offset + scale *
+		OFFSET + SCALE * coast->circles[coast->circles_length - 1].center.x,
+		OFFSET + SCALE *
 			(coast->circles[coast->circles_length - 1].center.y
 			+ coast->circles[coast->circles_length - 1].radius),
 		4
@@ -150,7 +162,7 @@ int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram 
 	return 1;
 }
 
-void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram, double scale, double offset)
+void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram)
 {
 	if (R == NULL || W == NULL || diagram == NULL) return;
 
@@ -168,59 +180,59 @@ void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram, double scale, doub
 		) {
 
 			atoll_DEBUG_drawcircle(
-				offset + scale * (diagram->sites[diagram->hedges[i].cell].x + diagram->sites[diagram->hedges[i^1].cell].x) / 2,
-				offset + scale * (diagram->sites[diagram->hedges[i].cell].y + diagram->sites[diagram->hedges[i^1].cell].y) / 2,
+				OFFSET + SCALE * (diagram->sites[diagram->hedges[i].cell].x + diagram->sites[diagram->hedges[i^1].cell].x) / 2,
+				OFFSET + SCALE * (diagram->sites[diagram->hedges[i].cell].y + diagram->sites[diagram->hedges[i^1].cell].y) / 2,
 				3
 			);
 
 			SDL_SetRenderDrawColor(R, INHEDGE_C);
 			SDL_RenderDrawLine(R,
-				offset + scale * diagram->sites[diagram->hedges[i].cell].x,
-				offset + scale * diagram->sites[diagram->hedges[i].cell].y,
-				offset + scale * diagram->sites[diagram->hedges[i^1].cell].x,
-				offset + scale * diagram->sites[diagram->hedges[i^1].cell].y
+				OFFSET + SCALE * diagram->sites[diagram->hedges[i].cell].x,
+				OFFSET + SCALE * diagram->sites[diagram->hedges[i].cell].y,
+				OFFSET + SCALE * diagram->sites[diagram->hedges[i^1].cell].x,
+				OFFSET + SCALE * diagram->sites[diagram->hedges[i^1].cell].y
 			);
 
 			continue;
 		}
 
 		SDL_RenderDrawLine(R,
-			offset + scale * diagram->vertices[diagram->hedges[i].head].x,
-			offset + scale * diagram->vertices[diagram->hedges[i].head].y,
-			offset + scale * diagram->vertices[diagram->hedges[i].tail].x,
-			offset + scale * diagram->vertices[diagram->hedges[i].tail].y
+			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].head].x,
+			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].head].y,
+			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].tail].x,
+			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].tail].y
 		);
 	}
 
 	SDL_SetRenderDrawColor(R, SITE_C);
 	for (unsigned int i = 0; i < diagram->site_count; ++i) {
 		atoll_DEBUG_drawcircle(
-			offset + scale * diagram->sites[i].x,
-			offset + scale * diagram->sites[i].y,
+			OFFSET + SCALE * diagram->sites[i].x,
+			OFFSET + SCALE * diagram->sites[i].y,
 			10
 		);
 	}
 }
 
-void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset, double *directix)
+void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *coast, double *directix)
 {
 	if (R == NULL || W == NULL || diagram == NULL || coast == NULL) return;
 
 	SDL_SetRenderDrawColor(R, CIRC_C);
 	for (unsigned int i = 0; i < coast->circles_length; ++i) {
 		atoll_DEBUG_drawcircle(
-			offset + scale * coast->circles[i].center.x,
-			offset + scale * coast->circles[i].center.y,
-			scale * coast->circles[i].radius
+			OFFSET + SCALE * coast->circles[i].center.x,
+			OFFSET + SCALE * coast->circles[i].center.y,
+			SCALE * coast->circles[i].radius
 		);
 		atoll_DEBUG_drawcircle(
-			offset + scale * coast->circles[i].center.x,
-			offset + scale * coast->circles[i].center.y,
+			OFFSET + SCALE * coast->circles[i].center.x,
+			OFFSET + SCALE * coast->circles[i].center.y,
 			3
 		);
 		atoll_DEBUG_drawcircle(
-			offset + scale * coast->circles[i].center.x,
-			offset + scale *
+			OFFSET + SCALE * coast->circles[i].center.x,
+			OFFSET + SCALE *
 				(coast->circles[i].center.y
 				+ coast->circles[i].radius),
 			3
@@ -234,7 +246,7 @@ void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *
 	struct atoll_podouble right = {0};
 	for (unsigned int j = 0; j < coast->foci_length; ++j) {
 		if (j == 0) {
-			left.x = (0.0 - offset) / scale;
+			left.x = (0.0 - OFFSET) / SCALE;
 		} else {
 			left = atoll_breakpoint(
 				*directix,
@@ -243,7 +255,7 @@ void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *
 			);
 		}
 		if (j == coast->foci_length - 1) {
-			right.x = (500.0 - offset) / scale;
+			right.x = (500.0 - OFFSET) / SCALE;
 		} else {
 			right = atoll_breakpoint(
 				*directix,
@@ -252,11 +264,11 @@ void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *
 			);
 		}
 		atoll_DEBUG_drawarc(
-			offset + scale * (*directix),
-			offset + scale * diagram->sites[coast->foci[j]].x,
-			offset + scale * diagram->sites[coast->foci[j]].y,
-			offset + scale * left.x,
-			offset + scale * right.x
+			OFFSET + SCALE * (*directix),
+			OFFSET + SCALE * diagram->sites[coast->foci[j]].x,
+			OFFSET + SCALE * diagram->sites[coast->foci[j]].y,
+			OFFSET + SCALE * left.x,
+			OFFSET + SCALE * right.x
 		);
 	}
 
