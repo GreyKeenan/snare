@@ -7,6 +7,8 @@
 
 #include "gu/echo.h"
 
+#include "./debug_paint.h"
+
 
 /*heap*/ struct gu_echo *atoll_treasure(struct atoll_diagram * /*nonull*/ diagram, struct atoll_coast * /*nonull*/ coast)
 {
@@ -23,6 +25,9 @@
 	// if one is empty, use the other
 
 	while (1) {
+
+		atoll_DEBUG_paint(diagram, coast, 0.5, 50);
+
 		if (coast->nextSite >= diagram->site_count && coast->circles_length == 0) {
 			break;
 		}

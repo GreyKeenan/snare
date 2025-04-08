@@ -74,3 +74,6 @@ convergence:
 
 simple:
 	make testcomp "tf=simple.c" "links= -lSDL2"
+
+simple_step:
+	make testcomp "tf=simple.c" "links= -lSDL2" "args=-DDEBUGSTEP"

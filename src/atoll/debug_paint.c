@@ -1,0 +1,325 @@
+#include "./debug_paint.h"
+
+#include "./diagram.h"
+#include "./coast.h"
+
+#include "./breakpoint.h"
+#include "./math.h"
+
+#include "gu/gu.h"
+
+#include "SDL2/SDL.h"
+#include <unistd.h>
+#include <stdlib.h>
+
+
+#define GRAY 0x60, 0x60, 0x60, 0xff
+#define WHITE 0xff, 0xff, 0xff, 0xff
+#define BLACK 0, 0, 0, 0xff
+#define MINCOL 0x80
+
+#define ARC_C 0x00, 0xff, 0xff, 0xff
+#define CIRC_C GRAY
+#define DX_C GRAY
+#define HIGH_C 0, 0xff, 0, 0xff
+#define SITE_C WHITE
+#define INHEDGE_C GRAY
+
+#define R atoll_DEBUG_renderer
+#define W atoll_DEBUG_window
+
+SDL_Renderer *atoll_DEBUG_renderer = NULL;
+SDL_Window *atoll_DEBUG_window = NULL;
+
+
+
+void atoll_DEBUG_drawarc(int dx, int fx, int fy, int left, int right);
+void atoll_DEBUG_drawcircle(int cx, int cy, int r);
+int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset);
+void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram, double scale, double offset);
+void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset, double *directix);
+
+
+int atoll_DEBUG_initSDL(void)
+{
+	int e = 0;
+
+	e = SDL_InitSubSystem(SDL_INIT_VIDEO);
+	if (e) return e;
+
+	W = SDL_CreateWindow("hopefully a voronoi diagram",
+		//SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		0, 0,
+		500, 500,
+		0 /*flags*/
+	);
+	if (W == NULL) return 1;
+
+	R = SDL_CreateRenderer(W, -1, 0);
+	if (R == NULL) return 1;
+
+	return 0;
+}
+void atoll_DEBUG_endSDL(void)
+{
+	if (R != NULL) SDL_DestroyRenderer(R);
+	if (W != NULL) SDL_DestroyWindow(W);
+	SDL_Quit();
+}
+
+void atoll_DEBUG_paint(struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset)
+{
+	if (R == NULL || W == NULL) return;
+
+	SDL_SetRenderDrawColor(R, BLACK);
+	SDL_RenderClear(R);
+
+	double dx = 0;
+	int directixExists = atoll_DEBUG_paint_highlight(&dx, diagram, coast, scale, offset);
+
+	atoll_DEBUG_paint_diagram(diagram, scale, offset);
+	atoll_DEBUG_paint_coast(diagram, coast, scale, offset,
+		directixExists? &dx:NULL
+	);
+
+
+	SDL_RenderPresent(R);
+
+	if (atoll_DEBUG_wait() == EOF) exit(0);
+}
+
+int atoll_DEBUG_paint_highlight(double directix[static 1], struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset)
+{
+	if (coast == NULL || diagram == NULL) return 0;
+	if (coast->nextSite >= diagram->site_count && coast->circles_length == 0) {
+		return 0;
+	}
+	SDL_SetRenderDrawColor(R, DX_C);
+	if (coast->nextSite >= diagram->site_count) {
+	} else if (coast->circles_length == 0
+		|| diagram->sites[coast->nextSite].y
+		< coast->circles[coast->circles_length - 1].center.y
+		+ coast->circles[coast->circles_length - 1].radius
+	) {
+		*directix = diagram->sites[coast->nextSite].y;
+
+		SDL_RenderDrawLine(R,
+			0,
+			offset + scale * (*directix),
+			500,
+			offset + scale * (*directix)
+		);
+		SDL_SetRenderDrawColor(R, HIGH_C);
+		atoll_DEBUG_drawcircle(
+			offset + scale * diagram->sites[coast->nextSite].x,
+			offset + scale * diagram->sites[coast->nextSite].y,
+			9
+		);
+		
+		return 1;
+	}
+
+	*directix = coast->circles[coast->circles_length - 1].center.y
+		+ coast->circles[coast->circles_length - 1].radius;
+
+	SDL_RenderDrawLine(R,
+		0,
+		offset + scale * (*directix),
+		500,
+		offset + scale * (*directix)
+	);
+	SDL_SetRenderDrawColor(R, HIGH_C);
+	//atoll_DEBUG_drawcircle(
+	//	offset + scale * coast->circles[coast->circles_length - 1].center.x,
+	//	offset + scale * coast->circles[coast->circles_length - 1].center.y,
+	//	scale * coast->circles[coast->circles_length - 1].radius
+	//);
+	atoll_DEBUG_drawcircle(
+		offset + scale * coast->circles[coast->circles_length - 1].center.x,
+		offset + scale * coast->circles[coast->circles_length - 1].center.y,
+		4
+	);
+	atoll_DEBUG_drawcircle(
+		offset + scale * coast->circles[coast->circles_length - 1].center.x,
+		offset + scale *
+			(coast->circles[coast->circles_length - 1].center.y
+			+ coast->circles[coast->circles_length - 1].radius),
+		4
+	);
+
+	return 1;
+}
+
+void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram, double scale, double offset)
+{
+	if (R == NULL || W == NULL || diagram == NULL) return;
+
+	for (unsigned int i = 0; i < diagram->hedges_length; i += 2) {
+
+		SDL_SetRenderDrawColor(R,
+			(rand() & 0xff) | MINCOL,
+			(rand() & 0xff) | MINCOL,
+			(rand() & 0xff) | MINCOL,
+			0xff);
+		// if (e < 0) { }
+
+		if (diagram->hedges[i].head == atoll_INDULL
+			|| diagram->hedges[i].tail == atoll_INDULL
+		) {
+
+			atoll_DEBUG_drawcircle(
+				offset + scale * (diagram->sites[diagram->hedges[i].cell].x + diagram->sites[diagram->hedges[i^1].cell].x) / 2,
+				offset + scale * (diagram->sites[diagram->hedges[i].cell].y + diagram->sites[diagram->hedges[i^1].cell].y) / 2,
+				3
+			);
+
+			SDL_SetRenderDrawColor(R, INHEDGE_C);
+			SDL_RenderDrawLine(R,
+				offset + scale * diagram->sites[diagram->hedges[i].cell].x,
+				offset + scale * diagram->sites[diagram->hedges[i].cell].y,
+				offset + scale * diagram->sites[diagram->hedges[i^1].cell].x,
+				offset + scale * diagram->sites[diagram->hedges[i^1].cell].y
+			);
+
+			continue;
+		}
+
+		SDL_RenderDrawLine(R,
+			offset + scale * diagram->vertices[diagram->hedges[i].head].x,
+			offset + scale * diagram->vertices[diagram->hedges[i].head].y,
+			offset + scale * diagram->vertices[diagram->hedges[i].tail].x,
+			offset + scale * diagram->vertices[diagram->hedges[i].tail].y
+		);
+	}
+
+	SDL_SetRenderDrawColor(R, SITE_C);
+	for (unsigned int i = 0; i < diagram->site_count; ++i) {
+		atoll_DEBUG_drawcircle(
+			offset + scale * diagram->sites[i].x,
+			offset + scale * diagram->sites[i].y,
+			10
+		);
+	}
+}
+
+void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *coast, double scale, double offset, double *directix)
+{
+	if (R == NULL || W == NULL || diagram == NULL || coast == NULL) return;
+
+	SDL_SetRenderDrawColor(R, CIRC_C);
+	for (unsigned int i = 0; i < coast->circles_length; ++i) {
+		atoll_DEBUG_drawcircle(
+			offset + scale * coast->circles[i].center.x,
+			offset + scale * coast->circles[i].center.y,
+			scale * coast->circles[i].radius
+		);
+		atoll_DEBUG_drawcircle(
+			offset + scale * coast->circles[i].center.x,
+			offset + scale * coast->circles[i].center.y,
+			3
+		);
+		atoll_DEBUG_drawcircle(
+			offset + scale * coast->circles[i].center.x,
+			offset + scale *
+				(coast->circles[i].center.y
+				+ coast->circles[i].radius),
+			3
+		);
+	}
+
+	//TODO draw the parabolas ugh
+	if (directix == NULL) return;
+	SDL_SetRenderDrawColor(R, ARC_C);
+	struct atoll_podouble left = {0};
+	struct atoll_podouble right = {0};
+	for (unsigned int j = 0; j < coast->foci_length; ++j) {
+		if (j == 0) {
+			left.x = (0.0 - offset) / scale;
+		} else {
+			left = atoll_breakpoint(
+				*directix,
+				diagram->sites[coast->foci[j - 1]],
+				diagram->sites[coast->foci[j]]
+			);
+		}
+		if (j == coast->foci_length - 1) {
+			right.x = (500.0 - offset) / scale;
+		} else {
+			right = atoll_breakpoint(
+				*directix,
+				diagram->sites[coast->foci[j]],
+				diagram->sites[coast->foci[j + 1]]
+			);
+		}
+		atoll_DEBUG_drawarc(
+			offset + scale * (*directix),
+			offset + scale * diagram->sites[coast->foci[j]].x,
+			offset + scale * diagram->sites[coast->foci[j]].y,
+			offset + scale * left.x,
+			offset + scale * right.x
+		);
+	}
+
+
+}
+
+
+
+
+void atoll_DEBUG_drawarc(int dx, int fx, int fy, int left, int right)
+{
+
+	if (fy == dx) {
+		SDL_RenderDrawLine(R, fx,fy, fx,0);
+		return;
+	}
+
+	for (int i = left; i < right; i += 1) {
+		SDL_RenderDrawPoint(R, i, atoll_parabola_y(i, fx, fy, dx));
+	}
+}
+
+
+
+
+
+void atoll_DEBUG_drawcircle(int cx, int cy, int r)
+{ //https://stackoverflow.com/questions/38334081/how-to-draw-circles-arcs-and-vector-graphics-in-sdl
+   const int diameter = (r * 2);
+
+   int x = (r - 1);
+   int y = 0;
+   int tx = 1;
+   int ty = 1;
+   int error = (tx - diameter);
+
+   while (x >= y)
+   {
+      //  Each of the following renders an octant of the circle
+      SDL_RenderDrawPoint(R, cx + x, cy - y);
+      SDL_RenderDrawPoint(R, cx + x, cy + y);
+      SDL_RenderDrawPoint(R, cx - x, cy - y);
+      SDL_RenderDrawPoint(R, cx - x, cy + y);
+      SDL_RenderDrawPoint(R, cx + y, cy - x);
+      SDL_RenderDrawPoint(R, cx + y, cy + x);
+      SDL_RenderDrawPoint(R, cx - y, cy - x);
+      SDL_RenderDrawPoint(R, cx - y, cy + x);
+
+      if (error <= 0)
+      {
+         ++y;
+         error += ty;
+         ty += 2;
+      }
+
+      if (error > 0)
+      {
+         --x;
+         tx += 2;
+         error += (tx - diameter);
+      }
+   }
+}
+
+
+

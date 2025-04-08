@@ -3,7 +3,8 @@
 #include "../diagram.h"
 #include "../coast.h"
 
-#include "../debug_display.c"
+//#include "../debug_display.c"
+#include "../debug_paint.c"
 #include "../debug.c"
 
 #include "gu/gu.h"
@@ -69,13 +70,15 @@ int (test)(struct atoll_point * /*nonull*/ sites, unsigned int length, double sc
 		//goto fin;
 	}
 
-	echo = atoll_DEBUG_display(&d, scale, offset);
-	if (echo != NULL) {
-		gu_echo_sneeze(echo);
-		gu_echo_destroy(echo);
-		e = 1;
-		goto fin;
-	}
+
+	#ifdef DEBUGSTEP
+	gu_sneeze("DONE!\n");
+	atoll_DEBUG_paint(&d, NULL, scale, offset);
+	#else
+	atoll_DEBUG_initSDL();
+	atoll_DEBUG_paint(&d, NULL, scale, offset);
+	atoll_DEBUG_endSDL();
+	#endif
 
 
 	fin:
@@ -100,7 +103,7 @@ int main(int argc, char **argv)
 	};
 	struct atoll_point s_9[] = {
 		// 0,0 50,0 50,50 0,50 0,25 25,0 50,25, 25,50 30,20
-		// 200,200 250,200 250,250 200,250 200,225 225,200 250,225, 225,250 230,220
+		// 125,125 375,125 375,375 125,375 125,250 250,125 375,250 250,375 275,225
 		(struct atoll_point) {300, 200},
 		(struct atoll_point) {250,500},
 		(struct atoll_point) {500,250},
@@ -121,8 +124,19 @@ int main(int argc, char **argv)
 	};
 
 
+	#ifdef DEBUGSTEP
+	int e = atoll_DEBUG_initSDL();
+	if (e) {
+		gu_sneeze("unable to init SDL: %d\n", e);
+		goto fin;
+	}
+	#endif
 
-	if (argc < 2) return test(s_9, 0.5, 50);
+
+	if (argc < 2) {
+		test(s_9, 0.5, 50);
+		goto fin;
+	}
 
 	for (int i = 0; argv[1][i] != '\0'; ++i) {
 		gu_sneeze("\nsites[%c]\n", argv[1][i]);
@@ -131,7 +145,7 @@ int main(int argc, char **argv)
 				test(s_d, 0.5, 125);
 				break;
 			case '9':
-				test(s_9, 0.5, 50);
+				test(s_9, 0.5, 125);
 				break;
 			case '4':
 				test(s_4, 0.5, 125);
@@ -140,6 +154,13 @@ int main(int argc, char **argv)
 				break;
 		}
 	}
+
+
+	fin:
+
+	#ifdef DEBUGSTEP
+	atoll_DEBUG_endSDL();
+	#endif
 
 	return 0;
 }
