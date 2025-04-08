@@ -8,15 +8,15 @@ typedef double expouble;
 #define EXPB "lf"
 
 struct scenario {
-	int16_t directix;
-	struct atoll_point left;
-	struct atoll_point right;
+	double directix;
+	struct atoll_podouble left;
+	struct atoll_podouble right;
 
 	expouble expected_x;
 	expouble expected_y;
 };
 
-static inline struct scenario scen(int16_t d, int16_t lx, int16_t ly, int16_t rx, int16_t ry, expouble ex, expouble ey)
+static inline struct scenario scen(double d, double lx, double ly, double rx, double ry, expouble ex, expouble ey)
 {
 	return (struct scenario) {
 		.directix = d,
@@ -30,7 +30,7 @@ static inline struct scenario scen(int16_t d, int16_t lx, int16_t ly, int16_t rx
 int test(struct scenario s) {
 	struct atoll_podouble bp = atoll_breakpoint(s.directix, s.left, s.right);
 
-	printf("d:%d l:(%d, %d) r:(%d, %d) exp:(%"EXPB", %"EXPB")"
+	printf("d:%.1lf l:(%.1lf, %.1lf) r:(%.1lf, %.1lf) exp:(%"EXPB", %"EXPB")"
 		"\n""\t""got:(%lf, %lf)"
 		"\n",
 		s.directix, s.left.x, s.left.y, s.right.x, s.right.y,

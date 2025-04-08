@@ -23,7 +23,7 @@ int atoll_circle_compare(const void * /*nonull*/ va, const void * /*nonull*/ vb)
 }
 
 
-int atoll_circle_identify(struct atoll_coast *coast, struct atoll_point *sites, unsigned int arc, double directix)
+int atoll_circle_identify(struct atoll_coast *coast, struct atoll_podouble *sites, unsigned int arc, double directix)
 {
 	if (coast == NULL || sites == NULL) return 2;
 
@@ -60,9 +60,9 @@ int atoll_arcIsntConverging(
 	unsigned int forarc,
 
 	double directix,
-	struct atoll_point a,
-	struct atoll_point b,
-	struct atoll_point c
+	struct atoll_podouble a,
+	struct atoll_podouble b,
+	struct atoll_podouble c
 )
 // I *think* this works even if the directix is lower than one of the foci.
 // (Which might be important to account for rounding errors.)
@@ -85,8 +85,8 @@ int atoll_arcIsntConverging(
 	}
 
 	if (a.y > b.y && c.y > b.y) return 0;
-	if (a.y > b.y) return (cc.x >= (b.x + (double)a.x)/2)? 0:4;
-	/*if (c.y > b.y)*/return (cc.x <= (b.x + (double)c.x)/2)? 0:5;
+	if (a.y > b.y) return (cc.x >= (b.x + a.x)/2)? 0:4;
+	/*if (c.y > b.y)*/return (cc.x <= (b.x + c.x)/2)? 0:5;
 }
 
 /*

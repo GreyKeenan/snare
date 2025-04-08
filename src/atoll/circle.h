@@ -17,7 +17,7 @@ struct atoll_circle {
 	unsigned int arc; // the closing arc
 };
 
-int atoll_circle_identify(struct atoll_coast *coast, struct atoll_point *sites, unsigned int arc, double directix);
+int atoll_circle_identify(struct atoll_coast *coast, struct atoll_podouble *sites, unsigned int arc, double directix);
 /*
 */
 
@@ -26,9 +26,9 @@ int atoll_arcIsntConverging(
 	unsigned int forarc,
 
 	double directix,
-	struct atoll_point focus_a,
-	struct atoll_point focus_b,
-	struct atoll_point focus_c
+	struct atoll_podouble focus_a,
+	struct atoll_podouble focus_b,
+	struct atoll_podouble focus_c
 );
 /*
 `a`, `b`, and `c` are sequential foci from the beachline.

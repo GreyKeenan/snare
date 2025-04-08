@@ -23,7 +23,7 @@ struct atoll_hedge {
 };
 
 struct atoll_diagram {
-	/*heap*/ struct atoll_point * /*nonull*/ sites;
+	/*heap*/ struct atoll_podouble * /*nonull*/ sites;
 	unsigned int site_count;
 
 	/*heap*/ unsigned int * /*nonull*/ cells;
@@ -31,7 +31,7 @@ struct atoll_diagram {
 	// BUT length is site_count + 1
 	// cells[site_count] is the border /or/ outside-cell
 
-	/*heap*/ struct atoll_point * /*nonull*/ vertices;
+	/*heap*/ struct atoll_podouble * /*nonull*/ vertices;
 	unsigned int vertices_length;
 	unsigned int vertices_allocation;
 
@@ -46,7 +46,7 @@ struct atoll_diagram {
 #define atoll_DONTCOPYSITES 1
 int atoll_diagram_init(
 	struct atoll_diagram self[static 1],
-	struct atoll_point * /*nonull*/ sites,
+	struct atoll_podouble * /*nonull*/ sites,
 	unsigned int site_count,
 	bool dontCopySites
 );

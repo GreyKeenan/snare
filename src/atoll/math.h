@@ -18,9 +18,9 @@ double atoll_parabola_y(
 */
 
 struct atoll_podouble atoll_circumcenter(
-	struct atoll_point p0,
-	struct atoll_point p1,
-	struct atoll_point p2
+	struct atoll_podouble p0,
+	struct atoll_podouble p1,
+	struct atoll_podouble p2
 );
 /*
 	returns (NAN, NAN) is no circumcenter exists

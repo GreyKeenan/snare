@@ -5,11 +5,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 
 int atoll_diagram_init(
 	struct atoll_diagram self[static 1],
-	struct atoll_point * /*nonull*/ sites,
+	struct atoll_podouble * /*nonull*/ sites,
 	unsigned int site_count,
 	bool dontCopySites
 )
@@ -20,9 +21,8 @@ int atoll_diagram_init(
 		|| site_count == UINT_MAX
 	) return 2;
 
-#if UINT_MAX > SIZE_MAX / 4
-	if (site_count + 1 > SIZE_MAX / sizeof(struct atoll_point)) return 3;
-#endif
+	//if (site_count + 1 > SIZE_MAX / sizeof(struct atoll_podouble)) return 3;
+	if (sizeof(struct atoll_podouble) > SIZE_MAX / (site_count + 1)) return 3;
 
 	*self = (struct atoll_diagram) {
 		.site_count = site_count
@@ -33,7 +33,7 @@ int atoll_diagram_init(
 	} else {
 		self->sites = malloc(sizeof(*self->sites) * site_count);
 		if (self->sites == NULL) return 4;
-		memcpy(self->sites, sites, sizeof(struct atoll_point) * site_count);
+		memcpy(self->sites, sites, sizeof(*sites) * site_count);
 	}
 
 	int e = 0;

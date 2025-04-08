@@ -1,38 +1,32 @@
 #include "./breakpoint.h"
 
+#include "./math.h"
+
 #include <math.h>
 
 
-//TODO: group this int "./math.h"
+
+static inline struct atoll_podouble atoll_breakpoint_horizontals(const double directix, const double y, const double left, const double right);
+static inline struct atoll_podouble atoll_breakpoint_verticals(const double directix, const double x, const double left, const double right);
+
+static inline struct atoll_podouble atoll_breakpoint_general(const double directix, const struct atoll_podouble left, const struct atoll_podouble right);
 
 
-static inline double atoll_breakpoint_parab_y(
-	const double x,
-	const double h, // h = vertex.x = focus.x
-	const double y, // y = focus.y
-	const double d  // d = directixY
-)
-{ return ((x - h)*(x - h)) / (2*(y - d))  +  (y + d)/2; }
-
-static inline struct atoll_podouble atoll_breakpoint_horizontals(const double directix, const int16_t y, const int16_t left, const int16_t right);
-static inline struct atoll_podouble atoll_breakpoint_verticals(const double directix, const int16_t x, const int16_t left, const int16_t right);
-
-static inline struct atoll_podouble atoll_breakpoint_general(const double directix, const struct atoll_point left, const struct atoll_point right);
-
-
-struct atoll_podouble atoll_breakpoint(const double directix, const struct atoll_point left, const struct atoll_point right)
+struct atoll_podouble atoll_breakpoint(const double directix, const struct atoll_podouble left, const struct atoll_podouble right)
 {
-	// a site is on the directix
+	if (left.y == directix && right.y == directix) return (struct atoll_podouble) {NAN,NAN};
+
+	// one site is on the directix
 	if (left.y == directix) {
 		return (struct atoll_podouble) {
 			.x = left.x,
-			.y = atoll_breakpoint_parab_y(left.x, right.x, right.y, directix)
+			.y = atoll_parabola_y(left.x, right.x, right.y, directix)
 		};
 	}
 	if (right.y == directix) {
 		return (struct atoll_podouble) {
 			.x = right.x,
-			.y = atoll_breakpoint_parab_y(right.x, left.x, left.y, directix)
+			.y = atoll_parabola_y(right.x, left.x, left.y, directix)
 		};
 	}
 
@@ -46,8 +40,95 @@ struct atoll_podouble atoll_breakpoint(const double directix, const struct atoll
 	return atoll_breakpoint_general(directix, left, right);
 }
 
-static inline struct atoll_podouble atoll_breakpoint_general(const double directix, const struct atoll_point left, const struct atoll_point right)
+static inline struct atoll_podouble atoll_breakpoint_general(const double directix, const struct atoll_podouble left, const struct atoll_podouble right)
+{
+
+	const double m = (left.x - right.x) / (right.y - left.y);
+
+	#define midx ((left.x + right.x) / 2)
+	#define midy ((left.y + right.y) / 2)
+	#define b (midy - m*midx)
+
+	#define h (left.x)
+	#define k ((directix + left.y) / 2)
+
+	const double p = (left.y - directix) / 2;
+
+	const double part_1 = h + 2*m*p;
+	const double part_2 = 2*p*sqrt( (h*m + b - k)/p + m*m );
+
+	const double x_sum = part_1 + part_2;
+	const double x_diff = part_1 - part_2;
+
+	double x = 0;
+	if (left.y > right.y) x = (x_sum > x_diff)? x_sum:x_diff;
+	else x = (x_sum < x_diff)? x_sum:x_diff;
+
+	#undef midx
+	#undef midy
+	#undef b
+	#undef h
+	#undef k
+
+	return (struct atoll_podouble) {
+		.x = x,
+		.y = atoll_parabola_y(x, left.x, left.y, directix) // TODO: can solve mx + b instead here
+	};
+}
+
+// ==========
+
+static inline struct atoll_podouble atoll_breakpoint_horizontals(const double directix, double y, double left, double right)
+{
+	const double x = (left + right) / 2;
+	return (struct atoll_podouble) {
+		.x = x,
+		.y = atoll_parabola_y(x, left, y, directix)
+	};
+}
+
+// ==========
+
+static inline struct atoll_podouble atoll_breakpoint_verticals(const double directix, double x, double left, double right)
+{
+		#define h (x)
+		#define k (left)
+		#define g (right)
+		#define h2 (h * 2)
+		#define d (directix)
+
+		const double top_2 = sqrt(   h2*h2 - 4*(h*h + (d - g)*(k - d))   );
+
+		// '+' will always result in the higher-x one since sqrt cant give negative ofc
+		if (left > right) {
+			return (struct atoll_podouble) {
+				.y = (k + g) / 2,
+				.x = (h2 + top_2) / 2
+			};
+		}
+
+		return (struct atoll_podouble) {
+			.y = (k + g) / 2,
+			.x = (h2 - top_2) / 2
+		};
+
+		#undef h
+		#undef k
+		#undef g
+		#undef h2
+		#undef d
+}
+
+
+
+
+// Logic/math behind these functions
+
 /*
+
+General Case
+==================================================
+
 Points are neither horizontally nor vertically aligned.
 We need to find the perpendicular line,
 and then the collision between that line and a parabola.
@@ -104,46 +185,10 @@ and then solve for x with both formulas
 
 (Remember that `p` is from: `vertex + p = focus`.
 
-*/
-{
 
-	const double m = (left.x - (double)right.x) / ((double)right.y - left.y);
+Horizontal case
+==================================================
 
-	#define midx ((left.x + (double)right.x) / 2)
-	#define midy ((left.y + (double)right.y) / 2)
-	#define b (midy - m*midx)
-
-	#define h (left.x)
-	#define k ((directix + left.y) / 2)
-
-	const double p = (left.y - directix) / 2;
-
-	const double part_1 = h + 2*m*p;
-	const double part_2 = 2*p*sqrt( (h*m + b - k)/p + m*m );
-
-	const double x_sum = part_1 + part_2;
-	const double x_diff = part_1 - part_2;
-
-	double x = 0;
-	if (left.y > right.y) x = (x_sum > x_diff)? x_sum:x_diff;
-	else x = (x_sum < x_diff)? x_sum:x_diff;
-
-	#undef midx
-	#undef midy
-	#undef b
-	#undef h
-	#undef k
-
-	return (struct atoll_podouble) {
-		.x = x,
-		.y = atoll_breakpoint_parab_y(x, left.x, left.y, directix)
-	};
-}
-
-// ==========
-
-static inline struct atoll_podouble atoll_breakpoint_horizontals(const double directix, int16_t y, int16_t left, int16_t right)
-/*
 Points are horizontally aligned,
 so their `x` is just the average x of left/right.
 Then, we can solve for y a parabola equation.
@@ -198,19 +243,10 @@ I think that form is preferrable here, but also:
 	--------------------- = y
 	        2(b - d)
 
-*/
-{
-	const double x = (left + (double)right) / 2;
-	return (struct atoll_podouble) {
-		.x = x,
-		.y = atoll_breakpoint_parab_y(x, left, y, directix)
-	};
-}
 
-// ==========
+Vertic case
+==================================================
 
-static inline struct atoll_podouble atoll_breakpoint_verticals(const double directix, int16_t x, int16_t left, int16_t right)
-/*
 The perpendicular line is a horizontal line.
 We know `outble.y = avg(left.y, right.y)`.
 Then, `distance = directix - outble.y`.
@@ -270,31 +306,3 @@ since y is derived from k and g.
 (I cheated on that one.)
 
 */
-{
-		#define h (double)(x)
-		#define k (double)(left)
-		#define g (double)(right)
-		#define h2 (h * 2)
-		#define d (directix)
-
-		const double top_2 = sqrt(   h2*h2 - 4*(h*h + (d - g)*(k - d))   );
-
-		// '+' will always result in the higher-x one since sqrt cant give negative ofc
-		if (left > right) {
-			return (struct atoll_podouble) {
-				.y = (k + g) / 2,
-				.x = (h2 + top_2) / 2
-			};
-		}
-
-		return (struct atoll_podouble) {
-			.y = (k + g) / 2,
-			.x = (h2 - top_2) / 2
-		};
-
-		#undef h
-		#undef k
-		#undef g
-		#undef h2
-		#undef d
-}

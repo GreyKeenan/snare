@@ -15,11 +15,7 @@
 
 	// create the vertex at the convergence point
 	const unsigned int newvertex = diagram->vertices_length;
-	const struct atoll_point vertex_struct = {
-		.x = event.center.x,
-		.y = event.center.y
-	};
-	e = gu_unstable_intlist_push(&diagram->vertices, &diagram->vertices_length, &diagram->vertices_allocation, &vertex_struct);
+	e = gu_unstable_intlist_push(&diagram->vertices, &diagram->vertices_length, &diagram->vertices_allocation, &event.center);
 	if (e) return gu_echo_new(e, "unable to push new vertex");
 
 	// create the new edge

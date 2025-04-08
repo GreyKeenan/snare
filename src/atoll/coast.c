@@ -14,9 +14,9 @@
 struct atoll_coast_context {
 	const unsigned int *beach;
 	unsigned int beach_length;
-	const struct atoll_point *sites;
+	const struct atoll_podouble *sites;
 	double d;
-	int16_t x;
+	double x;
 	int *e;
 };
 
@@ -135,7 +135,7 @@ int atoll_coast_compare(const void * /*nonull*/ vctx, const void * /*nonull*/ vf
 }
 
 
-int atoll_coast_arcAtX(const unsigned int * /*nonull*/ foci, unsigned int foci_length, const struct atoll_point * /*nonull*/ sites, double directix, int16_t x, unsigned int arcidx[static 1])
+int atoll_coast_arcAtX(const unsigned int * /*nonull*/ foci, unsigned int foci_length, const struct atoll_podouble * /*nonull*/ sites, double directix, double x, unsigned int arcidx[static 1])
 {
 
 	int e = 0;

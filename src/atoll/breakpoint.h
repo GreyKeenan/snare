@@ -4,7 +4,7 @@
 #include "./point.h"
 
 
-struct atoll_podouble atoll_breakpoint(double directix, struct atoll_point left, struct atoll_point right);
+struct atoll_podouble atoll_breakpoint(double directix, struct atoll_podouble left, struct atoll_podouble right);
 /*
 assumes
 	left != right
