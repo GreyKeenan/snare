@@ -24,7 +24,13 @@
 gu_comparer sort;
 int sort(const void *a, const void *b)
 {
-	return ((struct atoll_podouble*)a)->y - ((struct atoll_podouble*)b)->y;
+	#define A (*(struct atoll_podouble*)a)
+	#define B (*(struct atoll_podouble*)b)
+	if (B.y > A.y) return -1;
+	if (A.y > B.y) return 1;
+	return 0;
+	#undef A
+	#undef B
 }
 
 
@@ -70,15 +76,17 @@ int main(int argc, char **argv)
 
 	gu_sneeze("\npoints (*%lf):\n", TEST_SCALE);
 	for (unsigned int i = 0; i < POINTS; ++i) {
-		sites[i].x = (int)points[i * 2];
-		sites[i].y = (int)points[i*2 + 1];
-		gu_sneeze("(%.0lf, %.0lf) ", sites[i].x * TEST_SCALE, sites[i].y * TEST_SCALE);
+		//sites[i].x = (int)points[i * 2];
+		//sites[i].y = (int)points[i*2 + 1];
+		sites[i].x = points[i * 2];
+		sites[i].y = points[i*2 + 1];
+		gu_sneeze("(%lf, %lf) ", sites[i].x * TEST_SCALE, sites[i].y * TEST_SCALE);
 	}
 
 	gu_sneeze("\nsorted:\n");
 	gu_qsort(sites, sites_length, sort);
 	for (unsigned int i = 0; i < sites_length; ++i) {
-		gu_sneeze("[%2u]: (%.0lf, %.0lf)\n", i, sites[i].x, sites[i].y);
+		gu_sneeze("[%2u]: (%lf, %lf)\n", i, sites[i].x, sites[i].y);
 	}
 
 	// ==========
@@ -106,8 +114,8 @@ int main(int argc, char **argv)
 
 		//atoll_DEBUG_diagram_sneeze(&d);
 		//atoll_DEBUG_coast_sneeze(&c);
-		//e = 1;
-		//goto fin;
+		e = 1;
+		goto fin;
 	}
 
 

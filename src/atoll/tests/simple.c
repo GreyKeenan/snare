@@ -15,18 +15,13 @@
 gu_comparer sort;
 int sort(const void *a, const void *b)
 {
-	return ((struct atoll_podouble*)a)->y - ((struct atoll_podouble*)b)->y;
-
-/*
 	#define A (*(struct atoll_podouble*)a)
 	#define B (*(struct atoll_podouble*)b)
-
-	if (A.y == B.y) return A.x - B.x;
-	return A.y - B.y;
-
+	if (B.y > A.y) return -1;
+	if (A.y > B.y) return 1;
+	return 0;
 	#undef A
 	#undef B
-*/
 }
 
 
