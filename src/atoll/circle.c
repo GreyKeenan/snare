@@ -67,7 +67,7 @@ int atoll_arcIsntConverging(
 // I *think* this works even if the directix is lower than one of the foci.
 // (Which might be important to account for rounding errors.)
 {
-	if (b.y >= directix || (b.y > a.y && b.y > c.y)) return 1;
+	if (b.y >= directix || (b.y >= a.y && b.y >= c.y)) return 1;
 
 	struct atoll_podouble cc = atoll_circumcenter(a, b, c);
 	if (cc.x != cc.x) return 2;
