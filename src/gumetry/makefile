@@ -13,10 +13,7 @@ name= gumetry
 
 cfiles= \
 	cvpoly.c \
-
-links= \
-	-lm \
-	-L $(guroot) -l gu \
+	line.c \
 
 # ==========
 
@@ -26,19 +23,20 @@ lib:
 	mv *.o $(obdir)
 	ar rcs $(root)/lib$(name).a $(obdir)/*.o
 
+testcomp:
+	gcc $(gccflags) -iquote tests $(args) \
+		tests/$(tf) \
+		\
+		-L $(root) -l $(name) \
+		-L $(guroot) -l gu \
+		-lm \
+		$(links)
+
 # ==========
 
 .PHONY: test
 test: ./a.out
 	./a.out $(args)
 
-
 rpoints:
-	gcc $(gccflags) $(args) \
-		\
-		test/rpoints.c \
-		cvpoly.c \
-		\
-		-lm \
-		-lSDL2 \
-		-L $(guroot) -l gu
+	make testcomp "tf=rpoints.c" "links=-lSDL2"

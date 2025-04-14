@@ -96,8 +96,7 @@ int main(int argc, char **argv)
 
 
 
-	for (uint32_t i = 1; i > 0; ++i) {
-	}
+	fgetc(stdin);
 
 
 
