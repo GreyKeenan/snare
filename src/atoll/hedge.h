@@ -2,6 +2,9 @@
 #define ATOLL_hedge
 
 
+#include <stdbool.h>
+
+
 struct atoll_hedge {
 	unsigned int vertex[2];
 	unsigned int nigh[2];
@@ -9,10 +12,10 @@ struct atoll_hedge {
 };
 
 
-void atoll_hedge_append(struct atoll_hedge * /*nonull*/ hedges, unsigned int first, unsigned int new_hedge);
-/*
-Appends the new hedge to the first-hedge's linked list.
-*/
+bool atoll_hedge_join(struct atoll_hedge * /*nonull*/ hedges, unsigned int a, unsigned int b, bool priority);
+// "priority" prioritizes one or the other when everything is NADA
+// Using different priority in circleEvent() is important to
+// maintain a balance between unused previous-ends and unused next-ends.
 
 // ==========
 
@@ -22,8 +25,6 @@ int atoll_edge_create(
 	struct atoll_hedge * /*nonull*/ hedges[static 1],
 	unsigned int length[static 1],
 	unsigned int allocation[static 1],
-
-	unsigned int * cells,
 
 	unsigned int vertex_0,
 	unsigned int vertex_1,
@@ -51,9 +52,7 @@ returns 0 if the replacement is successful.
 returns nonzero if the `old_vertex` was not found to be replaced.
 */
 
-void atoll_edge_insertAfter(struct atoll_hedge * /*nonull*/ hedges, unsigned int afterme, unsigned int new_hedge);
-/*
-*/
+int atoll_edge_join(struct atoll_hedge * /*nonull*/ hedges, unsigned int a, unsigned int b, bool priority);
 
 
 #endif

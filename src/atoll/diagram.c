@@ -1,5 +1,7 @@
 #include "./diagram.h"
 
+#include "./hedge.h"
+
 #include "gu/gu.h"
 #include "gu/intlist.h"
 #include "gu/echo.h"
@@ -105,14 +107,18 @@ int atoll_diagram_addPolygon(
 			&self->hedges,
 			&self->hedges_length,
 			&self->hedges_allocation,
-			self->cells,
 
 			first_new_vertex + i,
 			first_new_vertex - 1 + (i? i:polygon_length),
-			
 			outside, inside
 		);
 		if (e) return 200 + e;
+
+		if (i == 0) self->cells[self->site_count] = self->hedges_length;
+		else {
+			e = atoll_hedge_join(self->hedges, self->hedges_length - 4, self->hedges_length - 2, 1);
+			if (e) return 300 + e;
+		}
 	}
 
 	return 0;

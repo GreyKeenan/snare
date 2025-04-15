@@ -27,8 +27,14 @@ static inline /*heap*/ struct gu_echo *atoll_siteEvent(
 
 	// create the new edge
 	const unsigned int newedge = diagram->hedges_length;
-	e = atoll_diagram_newedge(diagram, coast->foci[at], event);
+	//e = atoll_diagram_newedge(diagram, coast->foci[at], event);
+	e = atoll_edge_create(
+		&diagram->hedges, &diagram->hedges_length, &diagram->hedges_allocation,
+		atoll_NADA, atoll_NADA,
+		coast->foci[at], event
+	);
 	if (e) return gu_echo_new(e, "failed to create the half edges");
+	diagram->cells[event] = newedge^1; // make sure this lines up with the proper half
 
 	// remove the invalidated circle events
 	atoll_coast_removeCirclesWithArc(&coast->circles, &coast->circles_length, at);

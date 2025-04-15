@@ -51,20 +51,6 @@ int atoll_diagram_init(
 
 void atoll_diagram_reset(struct atoll_diagram *self);
 
-static inline int atoll_diagram_newedge(struct atoll_diagram self[static 1], unsigned int cell_1, unsigned int cell_2)
-{
-	return atoll_edge_create(
-		&self->hedges,
-		&self->hedges_length,
-		&self->hedges_allocation,
-
-		self->cells,
-
-		atoll_NADA, atoll_NADA,
-		cell_1, cell_2
-	);
-}
-
 int atoll_diagram_addPolygon(
 	struct atoll_diagram self[static 1],
 	struct gumetry_point * /*nonull*/ polygon,

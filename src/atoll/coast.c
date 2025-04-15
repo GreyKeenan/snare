@@ -96,12 +96,22 @@ void atoll_coast_reset(struct atoll_coast *self)
 
 		coast->foci[j] = i;
 	}
+	unsigned int new_hedge = 0;
 	for (unsigned int i = 0; i < count_aligned - 1; ++i) {
-		e = atoll_diagram_newedge(diagram, coast->foci[i], coast->foci[i + 1]);
+		//e = atoll_diagram_newedge(diagram, coast->foci[i], coast->foci[i + 1]);
+		new_hedge = diagram->hedges_length;
+		e = atoll_edge_create(
+			&diagram->hedges, &diagram->hedges_length, &diagram->hedges_allocation,
+			atoll_NADA, atoll_NADA,
+			coast->foci[i], coast->foci[i + 1]
+		);
 		if (e) return gu_echo_new(e, "failed to initialize new half-edges for break #%u", i);
 
-		dummy = i * 2;
-		e = gu_unstable_intlist_push(&coast->breaks, &coast->breaks_length, &coast->breaks_allocation, &dummy);
+		// update cells[]
+		if (i == 0) diagram->cells[coast->foci[i]] = new_hedge;
+		diagram->cells[coast->foci[i + 1]] = new_hedge^1;
+
+		e = gu_unstable_intlist_push(&coast->breaks, &coast->breaks_length, &coast->breaks_allocation, &new_hedge);
 		if (e) return gu_echo_new(e, "failed to push() break #%u", i);
 	}
 

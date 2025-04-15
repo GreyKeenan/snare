@@ -20,12 +20,30 @@
 
 	// create the new edge
 	const unsigned int newedge = diagram->hedges_length;
-	e = atoll_diagram_newedge(diagram, coast->foci[event.arc - 1], coast->foci[event.arc + 1]);
+	e = atoll_edge_create(
+		&diagram->hedges, &diagram->hedges_length, &diagram->hedges_allocation,
+		newvertex, atoll_NADA,
+		coast->foci[event.arc - 1], coast->foci[event.arc + 1]
+	);
 	if (e) return gu_echo_new(e, "unable to create new half edges");
 
-	// set the convergence as a vertex for the new edge & the converging edges
-	e = atoll_edge_replaceVertex(diagram->hedges, newedge, atoll_NADA, newvertex);
-	if (e) return gu_echo_new(e, "failed to set vertex for the new edge");
+	// update the linked lists
+	e = atoll_edge_join(diagram->hedges, newedge, coast->breaks[event.arc - 1], 0);
+	if (e != 1) return gu_echo_new(e, "failed to join newedge & left: %d", e);
+	e = atoll_edge_join(diagram->hedges, newedge, coast->breaks[event.arc], 1);
+	if (e != 1) return gu_echo_new(e, "failed to join newedge & right: %d", e);
+	e = atoll_edge_join(diagram->hedges, coast->breaks[event.arc - 1], coast->breaks[event.arc], 0);
+	if (e != 1) return gu_echo_new(e, "failed to join the converging edges: %d", e);
+
+	/*
+	gu_sneeze("new edge: (1):(%u)(%u) (2):(%u)(%u)\n",
+		diagram->hedges[newedge].nigh[0], diagram->hedges[newedge].nigh[1],
+		diagram->hedges[newedge^1].nigh[0], diagram->hedges[newedge^1].nigh[1]
+	); //aaaahhh thats it! It's setting the *next* for both, since thats the default when *everythings* NADA
+	*/
+
+	// set the convergence as a vertex for the the converging edges
+	// (is already set for the new edge)
 	e = atoll_edge_replaceVertex(diagram->hedges, coast->breaks[event.arc - 1], atoll_NADA, newvertex);
 	if (e) return gu_echo_new(e, "failed to set vertex for the left bp");
 	e = atoll_edge_replaceVertex(diagram->hedges, coast->breaks[event.arc], atoll_NADA, newvertex);

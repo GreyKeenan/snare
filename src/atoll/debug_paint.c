@@ -258,6 +258,7 @@ void atoll_DEBUG_paint_site(struct atoll_diagram *diagram, unsigned int site)
 		h = diagram->hedges[h].nigh[1];
 
 		if (h == diagram->cells[site]) break;
+		if (h == atoll_NADA) break;
 	}
 	
 }

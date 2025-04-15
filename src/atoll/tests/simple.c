@@ -63,8 +63,8 @@ int (test)(struct gumetry_point * /*nonull*/ sites, unsigned int length, double 
 
 		//atoll_DEBUG_diagram_sneeze(&d);
 		//atoll_DEBUG_coast_sneeze(&c);
-		//e = 1;
-		//goto fin;
+		e = 1;
+		goto fin;
 	}
 
 
@@ -110,6 +110,12 @@ int main(int argc, char **argv)
 		(struct gumetry_point) {500,0},
 		(struct gumetry_point) {0,500},
 		(struct gumetry_point) {500,500}
+	};
+	struct gumetry_point s_c[] = {
+		(struct gumetry_point) {300, 200},
+		(struct gumetry_point) {250,0},
+		(struct gumetry_point) {0,250},
+		(struct gumetry_point) {0,0}
 	};
 	struct gumetry_point s_4[] = {
 		// 0,0 50,0 50,50 0,50 0,25 25,0 50,25, 25,50 30,20
@@ -176,6 +182,9 @@ int main(int argc, char **argv)
 				break;
 			case '9':
 				test(s_9, 0.5, 125);
+				break;
+			case 'c':
+				test(s_c, 0.5, 125);
 				break;
 			case '4':
 				test(s_4, 0.5, 125);
