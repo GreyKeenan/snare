@@ -15,8 +15,8 @@
 gu_comparer sort;
 int sort(const void *a, const void *b)
 {
-	#define A (*(struct atoll_podouble*)a)
-	#define B (*(struct atoll_podouble*)b)
+	#define A (*(struct gumetry_point*)a)
+	#define B (*(struct gumetry_point*)b)
 	if (B.y > A.y) return -1;
 	if (A.y > B.y) return 1;
 	return 0;
@@ -26,7 +26,7 @@ int sort(const void *a, const void *b)
 
 
 #define test(s, ...) (test)((s), sizeof(s)/sizeof(*(s)), __VA_ARGS__)
-int (test)(struct atoll_podouble * /*nonull*/ sites, unsigned int length, double scale, double offset)
+int (test)(struct gumetry_point * /*nonull*/ sites, unsigned int length, double scale, double offset)
 {
 
 	int e = 0;
@@ -91,64 +91,64 @@ int main(int argc, char **argv)
 {
 	// http://www.raymondhill.net/voronoi/rhill-voronoi.html
 
-	struct atoll_podouble s_d[] = {
-		(struct atoll_podouble) {250, 250},
-		(struct atoll_podouble) {0,0},
-		(struct atoll_podouble) {500,0},
-		(struct atoll_podouble) {0,500},
-		(struct atoll_podouble) {500,500}
+	struct gumetry_point s_d[] = {
+		(struct gumetry_point) {250, 250},
+		(struct gumetry_point) {0,0},
+		(struct gumetry_point) {500,0},
+		(struct gumetry_point) {0,500},
+		(struct gumetry_point) {500,500}
 	};
-	struct atoll_podouble s_9[] = {
+	struct gumetry_point s_9[] = {
 		// 0,0 50,0 50,50 0,50 0,25 25,0 50,25, 25,50 30,20
 		// 125,125 375,125 375,375 125,375 125,250 250,125 375,250 250,375 275,225
-		(struct atoll_podouble) {300, 200},
-		(struct atoll_podouble) {250,500},
-		(struct atoll_podouble) {500,250},
-		(struct atoll_podouble) {250,0},
-		(struct atoll_podouble) {0,250},
-		(struct atoll_podouble) {0,0},
-		(struct atoll_podouble) {500,0},
-		(struct atoll_podouble) {0,500},
-		(struct atoll_podouble) {500,500}
+		(struct gumetry_point) {300, 200},
+		(struct gumetry_point) {250,500},
+		(struct gumetry_point) {500,250},
+		(struct gumetry_point) {250,0},
+		(struct gumetry_point) {0,250},
+		(struct gumetry_point) {0,0},
+		(struct gumetry_point) {500,0},
+		(struct gumetry_point) {0,500},
+		(struct gumetry_point) {500,500}
 	};
-	struct atoll_podouble s_4[] = {
+	struct gumetry_point s_4[] = {
 		// 0,0 50,0 50,50 0,50 0,25 25,0 50,25, 25,50 30,20
 		// 200,200 250,200 250,250 200,250 200,225 225,200 250,225, 225,250 230,220
-		(struct atoll_podouble) {123,50},
-		(struct atoll_podouble) {400,83},
-		(struct atoll_podouble) {415,292},
-		(struct atoll_podouble) {224,347}
+		(struct gumetry_point) {123,50},
+		(struct gumetry_point) {400,83},
+		(struct gumetry_point) {415,292},
+		(struct gumetry_point) {224,347}
 	};
 
-	struct atoll_podouble s_t[] = {
+	struct gumetry_point s_t[] = {
 		//50,40 160,40 90,50 160,50 100,60 110,70 50,70 150,80 70,80
 		// 20,130 190,140 180,140 120,150 60,180 90,180
-		(struct atoll_podouble) {50,40},
-		(struct atoll_podouble) {160,40},
-		(struct atoll_podouble) {90,50},
-		(struct atoll_podouble) {160,50},
-		(struct atoll_podouble) {100,60},
-		(struct atoll_podouble) {110,70},
-		(struct atoll_podouble) {50,70},
-		(struct atoll_podouble) {150,80},
-		(struct atoll_podouble) {70,80},
+		(struct gumetry_point) {50,40},
+		(struct gumetry_point) {160,40},
+		(struct gumetry_point) {90,50},
+		(struct gumetry_point) {160,50},
+		(struct gumetry_point) {100,60},
+		(struct gumetry_point) {110,70},
+		(struct gumetry_point) {50,70},
+		(struct gumetry_point) {150,80},
+		(struct gumetry_point) {70,80},
 
-		(struct atoll_podouble) {20,130},
-		(struct atoll_podouble) {190,140},
-		(struct atoll_podouble) {180,140},
-		(struct atoll_podouble) {120,150},
-		(struct atoll_podouble) {60,180},
-		(struct atoll_podouble) {90,180}
+		(struct gumetry_point) {20,130},
+		(struct gumetry_point) {190,140},
+		(struct gumetry_point) {180,140},
+		(struct gumetry_point) {120,150},
+		(struct gumetry_point) {60,180},
+		(struct gumetry_point) {90,180}
 	};
 
-	struct atoll_podouble s_s[] = {
+	struct gumetry_point s_s[] = {
 		// 140,160 40,260 240,300 120,360 180,360
-		(struct atoll_podouble) {70,80},
+		(struct gumetry_point) {70,80},
 
-		(struct atoll_podouble) {20,130},
-		(struct atoll_podouble) {120,150},
-		(struct atoll_podouble) {60,180},
-		(struct atoll_podouble) {90,180}
+		(struct gumetry_point) {20,130},
+		(struct gumetry_point) {120,150},
+		(struct gumetry_point) {60,180},
+		(struct gumetry_point) {90,180}
 	};
 
 

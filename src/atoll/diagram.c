@@ -10,7 +10,7 @@
 
 int atoll_diagram_init(
 	struct atoll_diagram self[static 1],
-	struct atoll_podouble * /*nonull*/ sites,
+	struct gumetry_point * /*nonull*/ sites,
 	unsigned int site_count,
 	bool dontCopySites
 )
@@ -21,8 +21,8 @@ int atoll_diagram_init(
 		|| site_count == UINT_MAX
 	) return 2;
 
-	//if (site_count + 1 > SIZE_MAX / sizeof(struct atoll_podouble)) return 3;
-	if (sizeof(struct atoll_podouble) > SIZE_MAX / (site_count + 1)) return 3;
+	//if (site_count + 1 > SIZE_MAX / sizeof(struct gumetry_point)) return 3;
+	if (sizeof(struct gumetry_point) > SIZE_MAX / (site_count + 1)) return 3;
 
 	*self = (struct atoll_diagram) {
 		.site_count = site_count

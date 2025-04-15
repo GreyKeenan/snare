@@ -24,8 +24,8 @@
 gu_comparer sort;
 int sort(const void *a, const void *b)
 {
-	#define A (*(struct atoll_podouble*)a)
-	#define B (*(struct atoll_podouble*)b)
+	#define A (*(struct gumetry_point*)a)
+	#define B (*(struct gumetry_point*)b)
 	if (B.y > A.y) return -1;
 	if (A.y > B.y) return 1;
 	return 0;

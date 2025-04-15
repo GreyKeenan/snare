@@ -9,8 +9,8 @@ typedef double expouble;
 
 struct scenario {
 	double directix;
-	struct atoll_podouble left;
-	struct atoll_podouble right;
+	struct gumetry_point left;
+	struct gumetry_point right;
 
 	expouble expected_x;
 	expouble expected_y;
@@ -28,7 +28,7 @@ static inline struct scenario scen(double d, double lx, double ly, double rx, do
 
 
 int test(struct scenario s) {
-	struct atoll_podouble bp = atoll_breakpoint(s.directix, s.left, s.right);
+	struct gumetry_point bp = atoll_breakpoint(s.directix, s.left, s.right);
 
 	printf("d:%.1lf l:(%.1lf, %.1lf) r:(%.1lf, %.1lf) exp:(%"EXPB", %"EXPB")"
 		"\n""\t""got:(%lf, %lf)"

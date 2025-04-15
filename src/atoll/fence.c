@@ -1,6 +1,6 @@
 #include "./fence.h"
 
-#include "./point.h"
+#include "gumetry/point.h"
 #include "./diagram.h"
 
 #include "gu/echo.h"
@@ -8,7 +8,7 @@
 
 /*heap*/ struct gu_echo *atoll_fence(
 	struct atoll_diagram *diagram,
-	struct atoll_podouble *polygon,
+	struct gumetry_point *polygon,
 	unsigned int vertex_count
 )
 {

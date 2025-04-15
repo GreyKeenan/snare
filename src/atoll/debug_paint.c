@@ -52,7 +52,7 @@ void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *
 #define GREATERX 0x02
 #define LOWERY 0x04
 #define GREATERY 0x08
-uint8_t atoll_DEBUG_whichSide(struct atoll_podouble a, struct atoll_podouble b, struct atoll_podouble p)
+uint8_t atoll_DEBUG_whichSide(struct gumetry_point a, struct gumetry_point b, struct gumetry_point p)
 {
 	if (a.x - b.x == 0) return (p.x < a.x)? LOWERX:GREATERX; //a->b is vertical
 
@@ -345,8 +345,8 @@ void atoll_DEBUG_paint_coast(struct atoll_diagram *diagram, struct atoll_coast *
 	//TODO draw the parabolas ugh
 	if (directix == NULL) return;
 	SDL_SetRenderDrawColor(R, ARC_C);
-	struct atoll_podouble left = {0};
-	struct atoll_podouble right = {0};
+	struct gumetry_point left = {0};
+	struct gumetry_point right = {0};
 	for (unsigned int j = 0; j < coast->foci_length; ++j) {
 
 		SDL_SetRenderDrawColor(R, ARC_C);

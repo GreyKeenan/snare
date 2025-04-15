@@ -3,14 +3,14 @@
 
 
 struct atoll_diagram;
-struct atoll_podouble;
+struct gumetry_point;
 
 struct gu_echo;
 
 
 /*heap*/ struct gu_echo *atoll_fence(
 	struct atoll_diagram *diagram,
-	struct atoll_podouble *polygon,
+	struct gumetry_point *polygon,
 	unsigned int vertex_count
 );
 /*

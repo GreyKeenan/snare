@@ -6,25 +6,25 @@
 
 
 
-static inline struct atoll_podouble atoll_breakpoint_horizontals(const double directix, const double y, const double left, const double right);
-static inline struct atoll_podouble atoll_breakpoint_verticals(const double directix, const double x, const double left, const double right);
+static inline struct gumetry_point atoll_breakpoint_horizontals(const double directix, const double y, const double left, const double right);
+static inline struct gumetry_point atoll_breakpoint_verticals(const double directix, const double x, const double left, const double right);
 
-static inline struct atoll_podouble atoll_breakpoint_general(const double directix, const struct atoll_podouble left, const struct atoll_podouble right);
+static inline struct gumetry_point atoll_breakpoint_general(const double directix, const struct gumetry_point left, const struct gumetry_point right);
 
 
-struct atoll_podouble atoll_breakpoint(const double directix, const struct atoll_podouble left, const struct atoll_podouble right)
+struct gumetry_point atoll_breakpoint(const double directix, const struct gumetry_point left, const struct gumetry_point right)
 {
-	if (left.y == directix && right.y == directix) return (struct atoll_podouble) {NAN,NAN};
+	if (left.y == directix && right.y == directix) return (struct gumetry_point) {NAN,NAN};
 
 	// one site is on the directix
 	if (left.y == directix) {
-		return (struct atoll_podouble) {
+		return (struct gumetry_point) {
 			.x = left.x,
 			.y = gumetry_parabolaV_y(left.x, right, directix)
 		};
 	}
 	if (right.y == directix) {
-		return (struct atoll_podouble) {
+		return (struct gumetry_point) {
 			.x = right.x,
 			.y = gumetry_parabolaV_y(right.x, left, directix)
 		};
@@ -40,7 +40,7 @@ struct atoll_podouble atoll_breakpoint(const double directix, const struct atoll
 	return atoll_breakpoint_general(directix, left, right);
 }
 
-static inline struct atoll_podouble atoll_breakpoint_general(const double directix, const struct atoll_podouble left, const struct atoll_podouble right)
+static inline struct gumetry_point atoll_breakpoint_general(const double directix, const struct gumetry_point left, const struct gumetry_point right)
 {
 
 	const double m = (left.x - right.x) / (right.y - left.y);
@@ -70,7 +70,7 @@ static inline struct atoll_podouble atoll_breakpoint_general(const double direct
 	#undef h
 	#undef k
 
-	return (struct atoll_podouble) {
+	return (struct gumetry_point) {
 		.x = x,
 		.y = gumetry_parabolaV_y(x, left, directix) // TODO: can solve mx + b instead here
 	};
@@ -78,10 +78,10 @@ static inline struct atoll_podouble atoll_breakpoint_general(const double direct
 
 // ==========
 
-static inline struct atoll_podouble atoll_breakpoint_horizontals(const double directix, double y, double left, double right)
+static inline struct gumetry_point atoll_breakpoint_horizontals(const double directix, double y, double left, double right)
 {
 	const double x = (left + right) / 2;
-	return (struct atoll_podouble) {
+	return (struct gumetry_point) {
 		.x = x,
 		.y = gumetry_parabolaV_y(x, (struct gumetry_point){left, y}, directix)
 	};
@@ -89,7 +89,7 @@ static inline struct atoll_podouble atoll_breakpoint_horizontals(const double di
 
 // ==========
 
-static inline struct atoll_podouble atoll_breakpoint_verticals(const double directix, double x, double left, double right)
+static inline struct gumetry_point atoll_breakpoint_verticals(const double directix, double x, double left, double right)
 {
 		#define h (x)
 		#define k (left)
@@ -101,13 +101,13 @@ static inline struct atoll_podouble atoll_breakpoint_verticals(const double dire
 
 		// '+' will always result in the higher-x one since sqrt cant give negative ofc
 		if (left > right) {
-			return (struct atoll_podouble) {
+			return (struct gumetry_point) {
 				.y = (k + g) / 2,
 				.x = (h2 + top_2) / 2
 			};
 		}
 
-		return (struct atoll_podouble) {
+		return (struct gumetry_point) {
 			.y = (k + g) / 2,
 			.x = (h2 - top_2) / 2
 		};

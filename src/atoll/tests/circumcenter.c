@@ -8,7 +8,7 @@
 
 int test(double ax, double ay, double bx, double by, double cx, double cy, double ex, double ey)
 {
-	struct atoll_podouble cc = atoll_circumcenter(
+	struct gumetry_point cc = atoll_circumcenter(
 		(struct atoll_point) {ax, ay},
 		(struct atoll_point) {bx, by},
 		(struct atoll_point) {cx, cy}

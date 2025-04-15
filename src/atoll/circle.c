@@ -25,7 +25,7 @@ int atoll_circle_compare(const void * /*nonull*/ va, const void * /*nonull*/ vb)
 }
 
 
-int atoll_circle_identify(struct atoll_coast *coast, struct atoll_podouble *sites, unsigned int arc, double directix)
+int atoll_circle_identify(struct atoll_coast *coast, struct gumetry_point *sites, unsigned int arc, double directix)
 {
 	if (coast == NULL || sites == NULL) return 2;
 
@@ -62,16 +62,16 @@ int atoll_arcIsntConverging(
 	unsigned int forarc,
 
 	double directix,
-	struct atoll_podouble a,
-	struct atoll_podouble b,
-	struct atoll_podouble c
+	struct gumetry_point a,
+	struct gumetry_point b,
+	struct gumetry_point c
 )
 // I *think* this works even if the directix is lower than one of the foci.
 // (Which might be important to account for rounding errors.)
 {
 	if (b.y >= directix || (b.y >= a.y && b.y >= c.y)) return 1;
 
-	struct atoll_podouble cc = gumetry_circumcenter(a, b, c);
+	struct gumetry_point cc = gumetry_circumcenter(a, b, c);
 	if (cc.x != cc.x) return 2;
 	if (cc.y < gumetry_parabolaV_y(cc.x, b, directix)) return 3;
 

@@ -14,7 +14,7 @@
 struct atoll_coast_context {
 	const unsigned int *beach;
 	unsigned int beach_length;
-	const struct atoll_podouble *sites;
+	const struct gumetry_point *sites;
 	double d;
 	double x;
 	int *e;
@@ -118,7 +118,7 @@ int atoll_coast_compare(const void * /*nonull*/ vctx, const void * /*nonull*/ vf
 		return -1; // is last element
 	}
 
-	const struct atoll_podouble breakpoint = atoll_breakpoint(
+	const struct gumetry_point breakpoint = atoll_breakpoint(
 		ctx->d,
 		ctx->sites[focus[0]],
 		ctx->sites[focus[1]]
@@ -135,7 +135,7 @@ int atoll_coast_compare(const void * /*nonull*/ vctx, const void * /*nonull*/ vf
 }
 
 
-int atoll_coast_arcAtX(const unsigned int * /*nonull*/ foci, unsigned int foci_length, const struct atoll_podouble * /*nonull*/ sites, double directix, double x, unsigned int arcidx[static 1])
+int atoll_coast_arcAtX(const unsigned int * /*nonull*/ foci, unsigned int foci_length, const struct gumetry_point * /*nonull*/ sites, double directix, double x, unsigned int arcidx[static 1])
 {
 
 	int e = 0;

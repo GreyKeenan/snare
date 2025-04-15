@@ -1,10 +1,10 @@
 #ifndef ATOLL_breakpoint
 #define ATOLL_breakpoint
 
-#include "./point.h"
+#include "gumetry/point.h"
 
 
-struct atoll_podouble atoll_breakpoint(double directix, struct atoll_podouble left, struct atoll_podouble right);
+struct gumetry_point atoll_breakpoint(double directix, struct gumetry_point left, struct gumetry_point right);
 /*
 assumes
 	left != right

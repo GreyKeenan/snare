@@ -2,7 +2,7 @@
 #define ATOLL_coast
 
 
-#include "./point.h"
+#include "gumetry/point.h"
 #include "./circle.h"
 
 #include "gu/intlist.h"
@@ -51,7 +51,7 @@ and the case of horizontally-aligned first `n` sites,
 where there are no breakpoints yet.
 */
 
-int atoll_coast_arcAtX(const unsigned int * /*nonull*/ foci, unsigned int foci_length, const struct atoll_podouble * /*nonull*/ sites, double directix, double x, unsigned int arcidx[static 1]);
+int atoll_coast_arcAtX(const unsigned int * /*nonull*/ foci, unsigned int foci_length, const struct gumetry_point * /*nonull*/ sites, double directix, double x, unsigned int arcidx[static 1]);
 /*
 Assumes breakpoints exist.
 Binary searches the beachline, based on breakpoints,
