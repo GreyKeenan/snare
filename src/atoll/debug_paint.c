@@ -4,7 +4,8 @@
 #include "./coast.h"
 
 #include "./breakpoint.h"
-#include "./math.h"
+
+#include "gumetry/parabola.h"
 
 #include "gu/gu.h"
 
@@ -432,7 +433,7 @@ void atoll_DEBUG_drawarc(int dx, int fx, int fy, int left, int right)
 	}
 
 	for (int i = left + 1; i < right; i += 1) {
-		SDL_RenderDrawPoint(R, i, atoll_parabola_y(i, fx, fy, dx));
+		SDL_RenderDrawPoint(R, i, gumetry_parabolaV_y(i, (struct gumetry_point){fx, fy}, dx));
 	}
 }
 

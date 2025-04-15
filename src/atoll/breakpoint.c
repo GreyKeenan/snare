@@ -1,6 +1,6 @@
 #include "./breakpoint.h"
 
-#include "./math.h"
+#include "gumetry/parabola.h"
 
 #include <math.h>
 
@@ -20,13 +20,13 @@ struct atoll_podouble atoll_breakpoint(const double directix, const struct atoll
 	if (left.y == directix) {
 		return (struct atoll_podouble) {
 			.x = left.x,
-			.y = atoll_parabola_y(left.x, right.x, right.y, directix)
+			.y = gumetry_parabolaV_y(left.x, right, directix)
 		};
 	}
 	if (right.y == directix) {
 		return (struct atoll_podouble) {
 			.x = right.x,
-			.y = atoll_parabola_y(right.x, left.x, left.y, directix)
+			.y = gumetry_parabolaV_y(right.x, left, directix)
 		};
 	}
 
@@ -72,7 +72,7 @@ static inline struct atoll_podouble atoll_breakpoint_general(const double direct
 
 	return (struct atoll_podouble) {
 		.x = x,
-		.y = atoll_parabola_y(x, left.x, left.y, directix) // TODO: can solve mx + b instead here
+		.y = gumetry_parabolaV_y(x, left, directix) // TODO: can solve mx + b instead here
 	};
 }
 
@@ -83,7 +83,7 @@ static inline struct atoll_podouble atoll_breakpoint_horizontals(const double di
 	const double x = (left + right) / 2;
 	return (struct atoll_podouble) {
 		.x = x,
-		.y = atoll_parabola_y(x, left, y, directix)
+		.y = gumetry_parabolaV_y(x, (struct gumetry_point){left, y}, directix)
 	};
 }
 

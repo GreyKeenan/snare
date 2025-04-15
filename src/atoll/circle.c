@@ -1,7 +1,9 @@
 #include "./circle.h"
 
 #include "./coast.h"
-#include "./math.h"
+
+#include "gumetry/triangle.h"
+#include "gumetry/parabola.h"
 
 #include "gu/gu.h"
 #include "gu/order.h"
@@ -69,9 +71,9 @@ int atoll_arcIsntConverging(
 {
 	if (b.y >= directix || (b.y >= a.y && b.y >= c.y)) return 1;
 
-	struct atoll_podouble cc = atoll_circumcenter(a, b, c);
+	struct atoll_podouble cc = gumetry_circumcenter(a, b, c);
 	if (cc.x != cc.x) return 2;
-	if (cc.y < atoll_parabola_y(cc.x, b.x, b.y, directix)) return 3;
+	if (cc.y < gumetry_parabolaV_y(cc.x, b, directix)) return 3;
 
 	if (destination != NULL) {
 		*destination = (struct atoll_circle) {

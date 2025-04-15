@@ -5,7 +5,7 @@ default:
 root= ..
 include $(root)/share.mk
 
-gccflags += -iquote $(guroot)
+gccflags += -iquote $(guroot) -iquote $(root)
 
 # ==========
 
@@ -16,7 +16,6 @@ cfiles= \
 	coast.c \
 	breakpoint.c \
 	circle.c \
-	math.c \
 	treasure.c \
 
 # ==========
@@ -32,6 +31,7 @@ testcomp:
 		tests/$(tf) \
 		\
 		-L $(root) -l $(name) \
+		-l gumetry \
 		-L $(guroot) -l gu \
 		-lm \
 		$(links)

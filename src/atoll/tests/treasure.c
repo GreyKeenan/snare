@@ -53,17 +53,18 @@ int main(int argc, char **argv)
 
 
 	#define VLEN 4
-	double vertices[VLEN * 2] = {
-		1, 1,
-		20, 1,
-		20, 20,
-		1, 20
+	struct gumetry_point vertices[VLEN] = {
+		(struct gumetry_point) {1, 1},
+		(struct gumetry_point) {20, 1},
+		(struct gumetry_point) {20, 20},
+		(struct gumetry_point) {1, 20}
 	};
 
 	#define POINTS 15
-	double points[POINTS * 2] = {0};
+	struct gumetry_point sites[POINTS] = {0};
+	unsigned int sites_length = POINTS;
 
-	e = gumetry_cvpoly_rpoints(vertices, VLEN, points, POINTS, rstate, gu_xorshiftr128plus_anonymous);
+	e = gumetry_cvpoly_rpoints(vertices, VLEN, sites, POINTS, rstate, gu_xorshiftr128plus_anonymous);
 	if (e) {
 		gu_sneeze("failed to generate random points\n");
 		goto fin;
@@ -71,15 +72,8 @@ int main(int argc, char **argv)
 
 	// ----------
 
-	struct atoll_podouble sites[POINTS] = {0};
-	unsigned int sites_length = POINTS;
-
 	gu_sneeze("\npoints (*%lf):\n", TEST_SCALE);
 	for (unsigned int i = 0; i < POINTS; ++i) {
-		//sites[i].x = (int)points[i * 2];
-		//sites[i].y = (int)points[i*2 + 1];
-		sites[i].x = points[i * 2];
-		sites[i].y = points[i*2 + 1];
 		gu_sneeze("(%lf, %lf) ", sites[i].x * TEST_SCALE, sites[i].y * TEST_SCALE);
 	}
 
