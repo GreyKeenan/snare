@@ -14,6 +14,7 @@ name= gumetry
 cfiles= \
 	cvpoly.c \
 	line.c \
+	triangle.c \
 
 # ==========
 
