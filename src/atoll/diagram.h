@@ -65,5 +65,12 @@ static inline int atoll_diagram_newedge(struct atoll_diagram self[static 1], uns
 	);
 }
 
+int atoll_diagram_addPolygon(
+	struct atoll_diagram self[static 1],
+	struct gumetry_point * /*nonull*/ polygon,
+	unsigned int polygon_length,
+	unsigned int outside, unsigned int inside
+);
+
 
 #endif

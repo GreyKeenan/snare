@@ -2,6 +2,7 @@
 
 #include "gu/gu.h"
 #include "gu/intlist.h"
+#include "gu/echo.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -76,4 +77,43 @@ void atoll_diagram_reset(struct atoll_diagram *self)
 	gu_free(self->hedges);
 
 	*self = (struct atoll_diagram){0};
+}
+
+
+int atoll_diagram_addPolygon(
+	struct atoll_diagram self[static 1],
+	struct gumetry_point * /*nonull*/ polygon,
+	unsigned int polygon_length,
+	unsigned int outside, unsigned int inside
+)
+{
+	int e = 0;
+
+	const unsigned int first_new_vertex = self->vertices_length;
+	for (unsigned int i = 0; i < polygon_length; ++i) {
+		e = gu_unstable_intlist_push(
+			&self->vertices,
+			&self->vertices_length,
+			&self->vertices_allocation,
+			polygon + i
+		);
+		if (e) return 100 + e;
+	}
+
+	for (unsigned int i = 0; i < polygon_length; ++i) {
+		e = atoll_edge_create(
+			&self->hedges,
+			&self->hedges_length,
+			&self->hedges_allocation,
+			self->cells,
+
+			first_new_vertex + i,
+			first_new_vertex - 1 + (i? i:polygon_length),
+			
+			outside, inside
+		);
+		if (e) return 200 + e;
+	}
+
+	return 0;
 }
