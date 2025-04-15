@@ -2,6 +2,7 @@
 
 #include "../diagram.h"
 #include "../coast.h"
+#include "../fence.h"
 
 #include "../debug_paint.c"
 
@@ -123,6 +124,17 @@ int main(int argc, char **argv)
 
 	atoll_DEBUG_setscale(TEST_SCALE, 0);
 	atoll_DEBUG_paint(&d, &c);
+
+	echo = atoll_fence(&d, vertices, VLEN);
+	if (echo != NULL) {
+		gu_echo_sneeze(echo);
+		gu_echo_destroy(echo);
+
+		//e = 1;
+		//goto fin;
+	}
+
+	atoll_DEBUG_paint(&d, NULL);
 
 	atoll_DEBUG_endSDL();
 

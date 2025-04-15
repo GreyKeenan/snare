@@ -18,6 +18,7 @@ cfiles= \
 	circle.c \
 	treasure.c \
 	hedge.c \
+	fence.c \
 
 # ==========
 

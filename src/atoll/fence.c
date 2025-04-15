@@ -1,24 +1,43 @@
 #include "./fence.h"
 
-#include "gumetry/point.h"
 #include "./diagram.h"
 
+#include "gu/gu.h"
 #include "gu/echo.h"
+#include "gu/intlist.h"
 
 
 /*heap*/ struct gu_echo *atoll_fence(
-	struct atoll_diagram *diagram,
-	struct gumetry_point *polygon,
-	unsigned int vertex_count
+	struct atoll_diagram * /*nonull*/ diagram,
+
+	struct gumetry_point * /*nonull*/ polygon,
+	unsigned int polygon_length
 )
 {
-	if (diagram == NULL || polygon == NULL || vertex_count < 3) {
-		return gu_echo_new(0, "bad inputs: diagram:%p polygon:%p vertex_count:%u",
-			(void*)diagram, (void*)polygon, vertex_count);
+	if (diagram == NULL || polygon == NULL || polygon_length < 3) {
+		return gu_echo_new(1, "bad inputs: diagram:(%p) polygon:(%p) polygon_length:(%u)",
+			(void*)diagram, (void*)polygon, polygon_length);
 	}
 
-	return gu_echo_new(1, "TODO");
+	int e = 0;
+	//*heap*/ struct gu_echo *echo = NULL;
+
+	e = atoll_diagram_addPolygon(diagram, polygon, polygon_length, diagram->site_count, atoll_NADA);
+	if (e) return gu_echo_new(e, "failed to add the bounding polygon to the diagram");
+
+
+
+	return gu_echo_new(0, "TODO");
 }
+
+// ==========
+
+
+
+
+
+
+
 
 /*
 Laying Out the Approach
@@ -30,6 +49,7 @@ Laying Out the Approach
 * Terms
 * What I need
 * The plan
+  * Elaborating on looping through voronoi-edges
 * Geometry notes
   * Line Segment Intersections
 
@@ -77,7 +97,7 @@ should match the existing diagram storage structure.
   their associated cells properly set.
   The cell for the outside-half of the bounding edges is `site_count`.
 * If any sites are outside of the diagram,
-  their corresponding `cell` entry should be NADA.
+  their corresponding `cell` entry should be INDULL.
 * Any removed edges will not only be unreferenced by the diagram's elements,
   but also removed from the `hedges` list.
   This ensures that you can still loop through all of the
@@ -96,7 +116,7 @@ First, add the polygon edges and vertices to the hedges & vertices lists.
 With the polygon as a linked list of edges,
 I can easily bisect edges where voronoi-lines cross them.
 For the inside-half of the new border-edges,
-set the cell to NADA.
+set the cell to INDULL.
 This indicates that the cell has not-yet been assigned, for later checks.
 Set `diagram->cells[site_count]` to a border-edge.
 
@@ -129,7 +149,7 @@ Additional details to consider:
   you are removing an edge that the `cell[]` list points to.
   If you are, update it to point one of the right hedges still.
   (Unless you are removing that cell entirely,
-  in which case you set the cell-entry to NADA, remember.)
+  in which case you set the cell-entry to INDULL, remember.)
 * what should happen when a voronoi-line intersects the polygon
   directly on a polygon-vertex?
   Creating a 0-length edge might be the most consistent,
@@ -142,10 +162,70 @@ But, yeah, I think thats pretty much the bulk
 of the line-clipping logic.
 
 
+Elaborating on looping through voronoi-edges
+--------------------------------------------------
+
+cases:
+
+* 2 inf
+  * partially-inside or entirely-outside
+* 2 inside
+  * entirely-inside
+    (because convex)
+* 2 outside
+  * ~~entirely outside~~
+  * partially-inside or entirely-outside
+* 1 inf 1 outside
+  * partially-inside or entirely-outside
+* 1 inf 1 inside
+  * partially-inside
+* 1 outside 1 inside
+  * partially-inside
+
+For simplification purposes,
+it may be worth it to first bound infinite edges within a rectangle
+that we know the entire bounding-polygon fits within.
+Then, there are fewer cases to worry about.
+If I'm doing that, I already have a list of only the infinite edges:
+the beachline.
+
+Hm. That isnt *strictly* necessary though.
+Instead, I can treat all infinite edges like outside-vertices,
+and calculate on-the-spot.
+
+* 2 outside
+  * entirely outside /or/ partially inside
+  * intersects 0 or 2 polygon-edges
+* 1 outside 1 inside
+  * partially inside
+  * intersects 1 polygon-edge
+* 2 inside
+  * entirely inside
+  * intersects 0 polygon-edges
+
+---
+
+	for each voronoi-line:
+	for each intersection between the voronoi-line and any polygon-edge:
+
+	* find which vertex of the voronoi-line is on the
+	  outside-side of the intersecting polygon-edge.
+	* set that outside-vertex to the intersection instead.
+	* split the polygon-edge at the intersection
+	* update the cell-records of the affected hedges
+
+---
+
+Oh, wait.
+I also have to catch the case when a line is colinear with the border.
+Annoying.
+
+
 Geometry notes
 ==================================================
 
-This stuff may be offloaded to the `gumetry` module instead of `atoll`.
+This stuff may be offloaded to the `gumetry` module
+instead of ~~`atoll`~~ `corn`.
 
 
 Line Segment Intersections
