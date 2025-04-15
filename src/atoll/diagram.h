@@ -2,25 +2,13 @@
 #define ATOLL_diagram
 
 
+#include "./hedge.h"
+#include "./nada.h"
+
 #include "gumetry/point.h"
 
 #include <stdbool.h>
-#include <limits.h>
 
-
-#define atoll_INDULL UINT_MAX
-	// index null
-
-
-struct atoll_hedge {
-	unsigned int previous;
-	unsigned int next;
-
-	unsigned int cell;
-
-	unsigned int head;
-	unsigned int tail;
-};
 
 struct atoll_diagram {
 	/*heap*/ struct gumetry_point * /*nonull*/ sites;
@@ -63,17 +51,19 @@ int atoll_diagram_init(
 
 void atoll_diagram_reset(struct atoll_diagram *self);
 
-int atoll_diagram_newedge(struct atoll_diagram self[static 1], unsigned int cell_1, unsigned int cell_2);
-/*
-	assumes:
-		self->hedges_allocation > 1
-			So gu_intlist_grow() will fit 2 more hedges.
-			This will be true if diagram was initialized with _diagram_init().
-	
-	returns 0 on success
-*/
+static inline int atoll_diagram_newedge(struct atoll_diagram self[static 1], unsigned int cell_1, unsigned int cell_2)
+{
+	return atoll_edge_create(
+		&self->hedges,
+		&self->hedges_length,
+		&self->hedges_allocation,
 
-int atoll_edge_giveVertex(struct atoll_hedge * /*nonull*/ hedges, unsigned int edge, unsigned int vertidx);
+		self->cells,
+
+		atoll_NADA, atoll_NADA,
+		cell_1, cell_2
+	);
+}
 
 
 #endif

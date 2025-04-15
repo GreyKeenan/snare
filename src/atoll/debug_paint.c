@@ -193,15 +193,15 @@ void atoll_DEBUG_paint_hedge(struct atoll_diagram *diagram, unsigned int hedge)
 	if (R == NULL || W == NULL || diagram == NULL) return;
 	if (hedge >= diagram->hedges_length) return;
 
-	if (diagram->hedges[hedge].head == atoll_INDULL
-		|| diagram->hedges[hedge].tail == atoll_INDULL
+	if (diagram->hedges[hedge].vertex[0] == atoll_NADA
+		|| diagram->hedges[hedge].vertex[1] == atoll_NADA
 	) return;
 
 
-	const double mix = (diagram->vertices[diagram->hedges[hedge].head].x
-	+ diagram->vertices[diagram->hedges[hedge].tail].x) / 2;
-	const double miy = (diagram->vertices[diagram->hedges[hedge].head].y
-	+ diagram->vertices[diagram->hedges[hedge].tail].y) / 2;
+	const double mix = (diagram->vertices[diagram->hedges[hedge].vertex[0]].x
+	+ diagram->vertices[diagram->hedges[hedge].vertex[1]].x) / 2;
+	const double miy = (diagram->vertices[diagram->hedges[hedge].vertex[0]].y
+	+ diagram->vertices[diagram->hedges[hedge].vertex[1]].y) / 2;
 	SDL_RenderDrawLine(R,
 		OFFSET + SCALE * mix,
 		OFFSET + SCALE * miy,
@@ -212,8 +212,8 @@ void atoll_DEBUG_paint_hedge(struct atoll_diagram *diagram, unsigned int hedge)
 
 
 	uint8_t ws = atoll_DEBUG_whichSide(
-		diagram->vertices[diagram->hedges[hedge].head],
-		diagram->vertices[diagram->hedges[hedge].tail],
+		diagram->vertices[diagram->hedges[hedge].vertex[0]],
+		diagram->vertices[diagram->hedges[hedge].vertex[1]],
 		diagram->sites[diagram->hedges[hedge].cell]
 	);
 
@@ -231,10 +231,10 @@ void atoll_DEBUG_paint_hedge(struct atoll_diagram *diagram, unsigned int hedge)
 	#undef OFF
 
 	SDL_RenderDrawLine(R,
-		offx + OFFSET + SCALE * diagram->vertices[diagram->hedges[hedge].head].x,
-		offy + OFFSET + SCALE * diagram->vertices[diagram->hedges[hedge].head].y,
-		offx + OFFSET + SCALE * diagram->vertices[diagram->hedges[hedge].tail].x,
-		offy + OFFSET + SCALE * diagram->vertices[diagram->hedges[hedge].tail].y
+		offx + OFFSET + SCALE * diagram->vertices[diagram->hedges[hedge].vertex[0]].x,
+		offy + OFFSET + SCALE * diagram->vertices[diagram->hedges[hedge].vertex[0]].y,
+		offx + OFFSET + SCALE * diagram->vertices[diagram->hedges[hedge].vertex[1]].x,
+		offy + OFFSET + SCALE * diagram->vertices[diagram->hedges[hedge].vertex[1]].y
 	);
 
 }
@@ -245,7 +245,7 @@ void atoll_DEBUG_paint_site(struct atoll_diagram *diagram, unsigned int site)
 	if (site >= diagram->site_count) return;
 
 	unsigned int h = diagram->cells[site];
-	if (h == atoll_INDULL) return;
+	if (h == atoll_NADA) return;
 
 	SDL_SetRenderDrawColor(R,
 		(rand() & 0x7f) | MINCOL,
@@ -255,7 +255,7 @@ void atoll_DEBUG_paint_site(struct atoll_diagram *diagram, unsigned int site)
 
 	while (1) {
 		atoll_DEBUG_paint_hedge(diagram, h);
-		h = diagram->hedges[h].next;
+		h = diagram->hedges[h].nigh[1];
 
 		if (h == diagram->cells[site]) break;
 	}
@@ -287,8 +287,8 @@ void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram)
 		*/
 		SDL_SetRenderDrawColor(R, WHITE);
 
-		if (diagram->hedges[i].head == atoll_INDULL
-			|| diagram->hedges[i].tail == atoll_INDULL
+		if (diagram->hedges[i].vertex[0] == atoll_NADA
+			|| diagram->hedges[i].vertex[1] == atoll_NADA
 		) {
 
 			atoll_DEBUG_drawcircle(
@@ -309,10 +309,10 @@ void atoll_DEBUG_paint_diagram(struct atoll_diagram *diagram)
 		}
 
 		SDL_RenderDrawLine(R,
-			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].head].x,
-			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].head].y,
-			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].tail].x,
-			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].tail].y
+			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].vertex[0]].x,
+			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].vertex[0]].y,
+			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].vertex[1]].x,
+			OFFSET + SCALE * diagram->vertices[diagram->hedges[i].vertex[1]].y
 		);
 	}
 }

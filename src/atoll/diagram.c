@@ -44,7 +44,7 @@ int atoll_diagram_init(
 		goto fin_err;
 	}
 	for (unsigned int i = 0; i < site_count + 1; ++i) {
-		self->cells[i] = atoll_INDULL;
+		self->cells[i] = atoll_NADA;
 	}
 
 	#define START (site_count + 1)
@@ -76,58 +76,4 @@ void atoll_diagram_reset(struct atoll_diagram *self)
 	gu_free(self->hedges);
 
 	*self = (struct atoll_diagram){0};
-}
-
-static inline void atoll_hedge_append( struct atoll_hedge * /*nonull*/ hedges, unsigned int head, unsigned int newtail)
-{
-	hedges[newtail].next = head;
-	hedges[newtail].previous = hedges[head].previous;
-
-	hedges[hedges[head].previous].next = newtail;
-	hedges[head].previous = newtail;
-}
-static inline void atoll_diagram_newhedge(struct atoll_diagram self[static 1], unsigned int cell)
-{
-	self->hedges[self->hedges_length] = (struct atoll_hedge) {
-		.cell = cell,
-		.previous = self->hedges_length,
-		.next     = self->hedges_length,
-		.head = atoll_INDULL,
-		.tail = atoll_INDULL
-	};
-	if (self->cells[cell] == atoll_INDULL) {
-		self->cells[cell] = self->hedges_length;
-	} else {
-		atoll_hedge_append(self->hedges, self->cells[cell], self->hedges_length);
-	}
-	self->hedges_length += 1;
-}
-int atoll_diagram_newedge(struct atoll_diagram self[static 1], unsigned int cell_1, unsigned int cell_2)
-{
-	int e = 0;
-
-	if (self->hedges_length > UINT_MAX - 2) return 100;
-	if (self->hedges_length + 2 > self->hedges_allocation) {
-		e = gu_intlist_grow(&self->hedges, &self->hedges_allocation);
-		if (e) return e;
-	}
-
-	atoll_diagram_newhedge(self, cell_1);
-	atoll_diagram_newhedge(self, cell_2);
-
-	return 0;
-}
-
-
-int atoll_edge_giveVertex(struct atoll_hedge * /*nonull*/ hedges, unsigned int edge, unsigned int vertidx)
-{
-	if (hedges[edge].head == atoll_INDULL) hedges[edge].head = vertidx;
-	else if (hedges[edge].tail == atoll_INDULL) hedges[edge].tail = vertidx;
-	else return 1;
-
-	if (hedges[edge^1].head == atoll_INDULL) hedges[edge^1].head = vertidx;
-	else if (hedges[edge^1].tail == atoll_INDULL) hedges[edge^1].tail = vertidx;
-	else return 2;
-
-	return 0;
 }

@@ -24,11 +24,11 @@
 	if (e) return gu_echo_new(e, "unable to create new half edges");
 
 	// set the convergence as a vertex for the new edge & the converging edges
-	e = atoll_edge_giveVertex(diagram->hedges, newedge, newvertex);
+	e = atoll_edge_replaceVertex(diagram->hedges, newedge, atoll_NADA, newvertex);
 	if (e) return gu_echo_new(e, "failed to set vertex for the new edge");
-	e = atoll_edge_giveVertex(diagram->hedges, coast->breaks[event.arc - 1], newvertex);
+	e = atoll_edge_replaceVertex(diagram->hedges, coast->breaks[event.arc - 1], atoll_NADA, newvertex);
 	if (e) return gu_echo_new(e, "failed to set vertex for the left bp");
-	e = atoll_edge_giveVertex(diagram->hedges, coast->breaks[event.arc], newvertex);
+	e = atoll_edge_replaceVertex(diagram->hedges, coast->breaks[event.arc], atoll_NADA, newvertex);
 	if (e) return gu_echo_new(e, "failed to set vertex for the right bp");
 
 	// remove the invalidated circle events

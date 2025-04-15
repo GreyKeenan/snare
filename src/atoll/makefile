@@ -17,6 +17,7 @@ cfiles= \
 	breakpoint.c \
 	circle.c \
 	treasure.c \
+	hedge.c \
 
 # ==========
 

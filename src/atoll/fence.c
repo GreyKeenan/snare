@@ -77,7 +77,7 @@ should match the existing diagram storage structure.
   their associated cells properly set.
   The cell for the outside-half of the bounding edges is `site_count`.
 * If any sites are outside of the diagram,
-  their corresponding `cell` entry should be INDULL.
+  their corresponding `cell` entry should be NADA.
 * Any removed edges will not only be unreferenced by the diagram's elements,
   but also removed from the `hedges` list.
   This ensures that you can still loop through all of the
@@ -96,7 +96,7 @@ First, add the polygon edges and vertices to the hedges & vertices lists.
 With the polygon as a linked list of edges,
 I can easily bisect edges where voronoi-lines cross them.
 For the inside-half of the new border-edges,
-set the cell to INDULL.
+set the cell to NADA.
 This indicates that the cell has not-yet been assigned, for later checks.
 Set `diagram->cells[site_count]` to a border-edge.
 
@@ -129,7 +129,7 @@ Additional details to consider:
   you are removing an edge that the `cell[]` list points to.
   If you are, update it to point one of the right hedges still.
   (Unless you are removing that cell entirely,
-  in which case you set the cell-entry to INDULL, remember.)
+  in which case you set the cell-entry to NADA, remember.)
 * what should happen when a voronoi-line intersects the polygon
   directly on a polygon-vertex?
   Creating a 0-length edge might be the most consistent,
