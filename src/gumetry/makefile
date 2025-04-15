@@ -40,3 +40,9 @@ test: ./a.out
 
 rpoints:
 	make testcomp "tf=rpoints.c" "links=-lSDL2"
+
+lineside:
+	make testcomp "tf=lineside.c"
+
+intersect:
+	make testcomp "tf=intersect.c"
