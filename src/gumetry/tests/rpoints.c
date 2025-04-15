@@ -45,17 +45,17 @@ int main(int argc, char **argv)
 
 
 	#define VERTICES 6
-	double cvpoly[VERTICES * 2] = {
-		 50,  50,
-		100,  75,
-		200, 150,
-		150, 200,
-		125, 230,
-		 75, 175
+	struct gumetry_point cvpoly[VERTICES] = {
+		(struct gumetry_point) { 50,  50},
+		(struct gumetry_point) {100,  75},
+		(struct gumetry_point) {200, 150},
+		(struct gumetry_point) {150, 200},
+		(struct gumetry_point) {125, 230},
+		(struct gumetry_point) { 75, 175}
 	};
 
 	#define POINTS 100
-	double random_points[POINTS * 2] = {0};
+	struct gumetry_point random_points[POINTS] = {0};
 	
 	uint64_t rstate[2] = {0};
 	gu_xorshiftr128plus_seed(rstate, 2);
@@ -70,12 +70,12 @@ int main(int argc, char **argv)
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00, 0xff);
 
-	e = SDL_RenderDrawLine(renderer, cvpoly[0], cvpoly[1], cvpoly[2 * (VERTICES - 1)], cvpoly[2 * VERTICES - 1]);
+	e = SDL_RenderDrawLine(renderer, cvpoly[0].x, cvpoly[0].y, cvpoly[VERTICES - 1].x, cvpoly[VERTICES - 1].y);
 	if (e) {
 		gu_sneeze("drawline error: %d. Continuing.\n", e);
 	}
 	for (int i = 1; i < VERTICES; ++i) {
-		e = SDL_RenderDrawLine(renderer, cvpoly[2 * (i - 1)], cvpoly[2 * i - 1], cvpoly[2 * i], cvpoly[2 * i + 1]);
+		e = SDL_RenderDrawLine(renderer, cvpoly[i - 1].x, cvpoly[i - 1].y, cvpoly[i].x, cvpoly[i].y);
 		if (e) {
 			gu_sneeze("drawline error: %d. Continuing.\n", e);
 		}
@@ -85,8 +85,8 @@ int main(int argc, char **argv)
 		gu_sneeze("failed to change to red.\n");
 	}
 	for (int i = 0; i < POINTS; ++i) {
-		printf("plotting point (%lf, %lf)\n", random_points[2 * i], random_points[2 * i + 1]);
-		e = SDL_RenderDrawPoint(renderer, random_points[2 * i], random_points[2 * i + 1]);
+		printf("plotting point (%lf, %lf)\n", random_points[i].x, random_points[i].y);
+		e = SDL_RenderDrawPoint(renderer, random_points[i].x, random_points[i].y);
 		if (e) {
 			gu_sneeze("failed to plot point %d\n", i);
 		}

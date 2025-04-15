@@ -2,15 +2,17 @@
 #define GUMETRY_cvpoly
 
 
+#include "./point.h"
+
 #include "gu/random.h"
 
 
-double gumetry_cvpoly_area(const double * restrict /*nonull*/ vertices, unsigned int vertex_count);
+double gumetry_cvpoly_area(const struct gumetry_point * restrict /*nonull*/ vertices, unsigned int vertex_count);
 
 int gumetry_cvpoly_rpoints(
-	const double * restrict /*nonull*/ vertices,
+	const struct gumetry_point * restrict /*nonull*/ vertices,
 	unsigned int vertex_count,
-	double * restrict /*nonull*/ output,
+	struct gumetry_point * restrict /*nonull*/ output,
 	unsigned int points,
 	void *rstate, gu_randomizer r
 );
