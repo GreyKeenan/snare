@@ -53,15 +53,16 @@ int main(int argc, char **argv)
 	gu_xorshiftr128plus_seed(rstate, seed);
 
 
-	#define VLEN 4
-	struct gumetry_point vertices[VLEN] = {
-		(struct gumetry_point) {1, 1},
+	struct gumetry_point vertices[] = {
+		(struct gumetry_point) {5, 1},
 		(struct gumetry_point) {20, 1},
-		(struct gumetry_point) {20, 20},
+		(struct gumetry_point) {20, 10},
+		(struct gumetry_point) {10, 20},
 		(struct gumetry_point) {1, 20}
 	};
+	#define VLEN (sizeof(vertices)/sizeof(*vertices))
 
-	#define POINTS 15
+	#define POINTS 45
 	struct gumetry_point sites[POINTS] = {0};
 	unsigned int sites_length = POINTS;
 
