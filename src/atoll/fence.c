@@ -2,9 +2,21 @@
 
 #include "./diagram.h"
 
+#include "gumetry/line.h"
+
 #include "gu/gu.h"
 #include "gu/echo.h"
 #include "gu/intlist.h"
+
+#include <stdint.h>
+
+
+static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
+	struct atoll_diagram * /*nonull*/ diagram,
+
+	struct gumetry_point center,
+	unsigned int edge
+);
 
 
 /*heap*/ struct gu_echo *atoll_fence(
@@ -20,19 +32,165 @@
 	}
 
 	int e = 0;
-	//*heap*/ struct gu_echo *echo = NULL;
+	/*heap*/ struct gu_echo *echo = NULL;
 
 	e = atoll_diagram_addPolygon(diagram, polygon, polygon_length, diagram->site_count, atoll_NADA);
 	if (e) return gu_echo_new(e, "failed to add the bounding polygon to the diagram");
 
 
+	struct gumetry_point center = gumetry_point_average(polygon, polygon_length);
 
-	return gu_echo_new(0, "TODO");
+	for (unsigned int i = 0; i < diagram->cells[diagram->site_count]; i += 2) {
+		echo = atoll_fence_clipEdge(diagram, center, i);
+		if (echo != NULL) return gu_echo_wrap(echo, 0, "clipEdge #%u failed", i);
+	}
+
+
+	return gu_echo_new(0, "TODO: follow-up by setting inside-cell of unset pedges");
 }
 
 // ==========
 
+static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
+	struct atoll_diagram * /*nonull*/ d,
 
+	struct gumetry_point center,
+	unsigned int edge
+)
+{
+	int e = 0;
+
+	#define EV (d->hedges[edge].vertex)
+	#define PV (d->hedges[pedge].vertex)
+
+	if (EV[0] == atoll_NADA || EV[1] == atoll_NADA) {
+		return gu_echo_new(0, "TODO: infinite edge case");
+	}
+	if (
+		d->vertices[EV[0]].x == d->vertices[EV[1]].x
+		&& d->vertices[EV[0]].y == d->vertices[EV[1]].y
+	) return gu_echo_new(0, "TODO: degenerate zero-length edges");
+
+	uint8_t pedge = d->cells[d->site_count];
+	uint8_t edge_side[2] = {0};
+	uint8_t poly_side[2] = {0};
+	uint8_t in_side = 0;
+
+	struct gumetry_point intersect = {0};
+	unsigned int intersect_count = 0;
+
+	do {
+		pedge = d->hedges[pedge].nigh[1];
+
+		if (
+			d->vertices[PV[0]].x == d->vertices[PV[1]].x
+			&& d->vertices[PV[0]].y == d->vertices[PV[1]].y
+		) return gu_echo_new(0, "TODO: degenerate zero-length edges");
+
+		// ==========
+
+		in_side = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], center);
+		if (in_side == 0) return gu_echo_new(0, "the center should never be on the polygon");
+
+		edge_side[0] = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], d->vertices[EV[0]]);
+		edge_side[1] = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], d->vertices[EV[1]]);
+		if ((edge_side[0] | edge_side[1]) == 0) return gu_echo_new(0, "TODO: collinear case");
+		if (edge_side[0] & edge_side[1]) continue; // no intersection
+
+		poly_side[0] = gumetry_line_side(d->vertices[EV[0]], d->vertices[EV[1]], d->vertices[PV[0]]);
+		poly_side[1] = gumetry_line_side(d->vertices[EV[0]], d->vertices[EV[1]], d->vertices[PV[1]]);
+		if (poly_side[0] & poly_side[1]) continue; // no intersection
+
+		intersect_count += 1;
+
+		// ==========
+
+		/*
+
+		remaining cases:
+
+		* 1 vertex inside, other outside
+		  * find intersection
+		  * update outside-vertex
+		  * split poly-edge
+		* 1 on the line, one inside
+		  * set on-line vertex as intersection
+		  * split poly-edge
+		* 1 on the line, one outside
+		  * set on-line vertex as intersection
+		  * update outside-vertex
+		  * split poly-edge
+
+		  > ~~can maybe create zero-length edges in this case?
+		    For now, at least.~~
+			No, can delete that edge.
+
+		*/
+
+		// find the intersection
+		if      (edge_side[0] == 0) intersect = d->vertices[EV[0]];
+		else if (edge_side[1] == 0) intersect = d->vertices[EV[1]];
+		else if (poly_side[0] == 0) intersect = d->vertices[PV[0]];
+		else if (poly_side[1] == 0) intersect = d->vertices[PV[1]];
+		else {
+			e = gumetry_line_intersection(
+				&intersect,
+				d->vertices[EV[0]], d->vertices[EV[1]],
+				d->vertices[PV[0]], d->vertices[PV[1]]
+			);
+			if (e != gumetry_INTERSECT) return gu_echo_new(e, "should always be an intersection here. Rounding error?");
+		}
+
+		// if a vertex is on the out_side, set it to the intersection
+		e = gu_unstable_intlist_push(
+			&d->vertices, &d->vertices_length, &d->vertices_allocation, &intersect
+		);
+		if (e) return gu_echo_new(e, "unable to push new vertex");
+		if (edge_side[0] != 0 && edge_side[0] != in_side) {
+			e = atoll_edge_replaceVertex(d->hedges, edge, EV[0], d->vertices_length - 1);
+			if (e) return gu_echo_new(e, "unable to replace with new vertex (0)");
+		} else if (edge_side[1] != 0 && edge_side[1] != in_side) {
+			e = atoll_edge_replaceVertex(d->hedges, edge, EV[1], d->vertices_length - 1);
+			if (e) return gu_echo_new(e, "unable to replace with new vertex (1)");
+		}
+
+		/*
+		When updating the half-edge linked lists,
+		How do I know which cell goes to which newly bisected line?
+		I can base it off of the sites' side, *if* i assume all cells are convex.
+		They would be in the voronoi-case.
+		Wait, fuck, I need the sites then too.
+		This is quickly becoming not-generalized.
+		I think I'll have to get rid of this whole "corn" thing maybe.
+		*/
+
+		/*
+		
+		create a new edge
+			cell: external_cell
+			cell: NADA for now
+			vertex: the intersection
+			vertex: the second of the pedge's vertices
+		update the old & new pedges
+			their NADA cell needs to be set to the appropriate inside-cell
+		update the linked list
+			insert the new edge after the old
+			update *all three* of the linked lists: outside, one-side of inside, other-side of inside
+
+		*/
+
+	} while (pedge != d->cells[d->site_count]);
+
+	if (intersect_count != 0) return NULL;
+
+	if (edge_side[0] & in_side) return NULL; //entirely inside
+
+	return gu_echo_new(0, "TODO: entirely-outside edges");
+
+	#undef EV
+	#undef PV
+
+}
 
 
 
