@@ -34,12 +34,6 @@ int atoll_edge_create(
 );
 /*
 Allocates & initializes two half-edges, linked as a single edge.
-
-If `cells` or `cell_0`/`cell_1` respectively are not NULL/NADA,
-updates the `cell[cell_#]` with an index to the respective new hedge.
-If `cell[cell_#]` is NADA, overwrites it with a new index.
-If `cell[cell_#]` is not NADA, appends the new hedge to that cell's hedge's linked list.
-
 returns 0 on success
 */
 
