@@ -30,18 +30,18 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_getSides(
 	uint8_t in_side[static 1]
 );
 static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_getIntersect(
-	const struct atoll_diagram * /*nonull*/ d,
+	struct atoll_diagram * /*nonull*/ d,
 	unsigned int edge, unsigned int pedge,
 	const uint8_t edge_side[static 2],
 	const uint8_t poly_side[static 2],
-	struct gumetry_point dest[static 1]
+	unsigned int dest[static 1]
 );
 static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_bringEdgeToVertex(
 	struct atoll_diagram * /*nonull*/ d,
 	unsigned int edge,
 	const uint8_t edge_side[static 2],
 	uint8_t in_side,
-	struct gumetry_point intersect
+	unsigned int intersect
 );
 
 
@@ -101,7 +101,7 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
 	uint8_t poly_side[2] = {0};
 	uint8_t in_side = 0;
 
-	struct gumetry_point intersect = {0};
+	unsigned int intersect = 0;
 	unsigned int intersect_count = 0;
 
 	do {
@@ -208,24 +208,34 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_getSides(
 		return NULL;
 }
 static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_getIntersect(
-	const struct atoll_diagram * /*nonull*/ d,
+	struct atoll_diagram * /*nonull*/ d,
 	unsigned int edge, unsigned int pedge,
 	const uint8_t edge_side[static 2],
 	const uint8_t poly_side[static 2],
-	struct gumetry_point dest[static 1]
+	unsigned int dest[static 1]
 )
 {
-		if      (edge_side[0] == 0) *dest = d->vertices[EV[0]];
-		else if (edge_side[1] == 0) *dest = d->vertices[EV[1]];
-		else if (poly_side[0] == 0) *dest = d->vertices[PV[0]];
-		else if (poly_side[1] == 0) *dest = d->vertices[PV[1]];
+		if      (edge_side[0] == 0) *dest = EV[0];
+		else if (edge_side[1] == 0) *dest = EV[1];
+		else if (poly_side[0] == 0) *dest = PV[0];
+		else if (poly_side[1] == 0) *dest = PV[1];
 		else {
+
+			struct gumetry_point intersect_point = {0};
 			int e = gumetry_line_intersection(
-				dest,
+				&intersect_point,
 				d->vertices[EV[0]], d->vertices[EV[1]],
 				d->vertices[PV[0]], d->vertices[PV[1]]
 			);
 			if (e != gumetry_INTERSECT) return gu_echo_new(e, "should always be an intersection here. Rounding error?");
+
+			const unsigned int new_vertex = d->vertices_length;
+			e = gu_unstable_intlist_push(
+				&d->vertices, &d->vertices_length, &d->vertices_allocation, &intersect_point
+			);
+			if (e) return gu_echo_new(e, "unable to push new vertex");
+
+			*dest = new_vertex;
 		}
 		return NULL;
 }
@@ -235,18 +245,16 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_bringEdgeToVertex(
 	unsigned int edge,
 	const uint8_t edge_side[static 2],
 	uint8_t in_side,
-	struct gumetry_point intersect
+	unsigned int intersect
 )
 {
-		int e = gu_unstable_intlist_push(
-			&d->vertices, &d->vertices_length, &d->vertices_allocation, &intersect
-		);
-		if (e) return gu_echo_new(e, "unable to push new vertex");
+		int e = 0;
+
 		if (edge_side[0] != 0 && edge_side[0] != in_side) {
-			e = atoll_edge_replaceVertex(d->hedges, edge, EV[0], d->vertices_length - 1);
+			e = atoll_edge_replaceVertex(d->hedges, edge, EV[0], intersect);
 			if (e) return gu_echo_new(e, "unable to replace with new vertex (0)");
 		} else if (edge_side[1] != 0 && edge_side[1] != in_side) {
-			e = atoll_edge_replaceVertex(d->hedges, edge, EV[1], d->vertices_length - 1);
+			e = atoll_edge_replaceVertex(d->hedges, edge, EV[1], intersect);
 			if (e) return gu_echo_new(e, "unable to replace with new vertex (1)");
 		}
 
