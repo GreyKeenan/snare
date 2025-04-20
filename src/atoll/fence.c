@@ -11,11 +11,37 @@
 #include <stdint.h>
 
 
+#define EV (d->hedges[edge].vertex)
+#define PV (d->hedges[pedge].vertex)
+
+
 static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
 	struct atoll_diagram * /*nonull*/ diagram,
 
 	struct gumetry_point center,
 	unsigned int edge
+);
+static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_getSides(
+	const struct atoll_diagram * /*nonull*/ d,
+	struct gumetry_point center,
+	unsigned int edge, unsigned int pedge,
+	uint8_t edge_side[static 2],
+	uint8_t poly_side[static 2],
+	uint8_t in_side[static 1]
+);
+static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_getIntersect(
+	const struct atoll_diagram * /*nonull*/ d,
+	unsigned int edge, unsigned int pedge,
+	const uint8_t edge_side[static 2],
+	const uint8_t poly_side[static 2],
+	struct gumetry_point dest[static 1]
+);
+static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_bringEdgeToVertex(
+	struct atoll_diagram * /*nonull*/ d,
+	unsigned int edge,
+	const uint8_t edge_side[static 2],
+	uint8_t in_side,
+	struct gumetry_point intersect
 );
 
 
@@ -58,10 +84,7 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
 	unsigned int edge
 )
 {
-	int e = 0;
-
-	#define EV (d->hedges[edge].vertex)
-	#define PV (d->hedges[pedge].vertex)
+	//int e = 0;
 
 	if (EV[0] == atoll_NADA || EV[1] == atoll_NADA) {
 		return gu_echo_new(0, "TODO: infinite edge case");
@@ -70,6 +93,8 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
 		d->vertices[EV[0]].x == d->vertices[EV[1]].x
 		&& d->vertices[EV[0]].y == d->vertices[EV[1]].y
 	) return gu_echo_new(0, "TODO: degenerate zero-length edges");
+
+	/*heap*/ struct gu_echo *echo = NULL;
 
 	uint8_t pedge = d->cells[d->site_count];
 	uint8_t edge_side[2] = {0};
@@ -87,23 +112,15 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
 			&& d->vertices[PV[0]].y == d->vertices[PV[1]].y
 		) return gu_echo_new(0, "TODO: degenerate zero-length edges");
 
-		// ==========
+		echo = atoll_fence_clipEdge_getSides(
+			d, center, edge, pedge,
+			edge_side, poly_side, &in_side
+		);
+		if (echo != NULL) return gu_echo_wrap(echo, 0, "unable to get side codes");
 
-		in_side = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], center);
-		if (in_side == 0) return gu_echo_new(0, "the center should never be on the polygon");
-
-		edge_side[0] = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], d->vertices[EV[0]]);
-		edge_side[1] = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], d->vertices[EV[1]]);
-		if ((edge_side[0] | edge_side[1]) == 0) return gu_echo_new(0, "TODO: collinear case");
-		if (edge_side[0] & edge_side[1]) continue; // no intersection
-
-		poly_side[0] = gumetry_line_side(d->vertices[EV[0]], d->vertices[EV[1]], d->vertices[PV[0]]);
-		poly_side[1] = gumetry_line_side(d->vertices[EV[0]], d->vertices[EV[1]], d->vertices[PV[1]]);
-		if (poly_side[0] & poly_side[1]) continue; // no intersection
-
+		if (edge_side[0] & edge_side[1]) continue;
+		if (poly_side[0] & poly_side[1]) continue;
 		intersect_count += 1;
-
-		// ==========
 
 		/*
 
@@ -127,42 +144,19 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
 
 		*/
 
-		// find the intersection
-		if      (edge_side[0] == 0) intersect = d->vertices[EV[0]];
-		else if (edge_side[1] == 0) intersect = d->vertices[EV[1]];
-		else if (poly_side[0] == 0) intersect = d->vertices[PV[0]];
-		else if (poly_side[1] == 0) intersect = d->vertices[PV[1]];
-		else {
-			e = gumetry_line_intersection(
-				&intersect,
-				d->vertices[EV[0]], d->vertices[EV[1]],
-				d->vertices[PV[0]], d->vertices[PV[1]]
-			);
-			if (e != gumetry_INTERSECT) return gu_echo_new(e, "should always be an intersection here. Rounding error?");
-		}
-
-		// if a vertex is on the out_side, set it to the intersection
-		e = gu_unstable_intlist_push(
-			&d->vertices, &d->vertices_length, &d->vertices_allocation, &intersect
+		echo = atoll_fence_clipEdge_getIntersect(
+			d, edge, pedge,
+			edge_side, poly_side,
+			&intersect
 		);
-		if (e) return gu_echo_new(e, "unable to push new vertex");
-		if (edge_side[0] != 0 && edge_side[0] != in_side) {
-			e = atoll_edge_replaceVertex(d->hedges, edge, EV[0], d->vertices_length - 1);
-			if (e) return gu_echo_new(e, "unable to replace with new vertex (0)");
-		} else if (edge_side[1] != 0 && edge_side[1] != in_side) {
-			e = atoll_edge_replaceVertex(d->hedges, edge, EV[1], d->vertices_length - 1);
-			if (e) return gu_echo_new(e, "unable to replace with new vertex (1)");
-		}
+		if (echo != NULL) return gu_echo_wrap(echo, 0, "unable to get intersection");
 
-		/*
-		When updating the half-edge linked lists,
-		How do I know which cell goes to which newly bisected line?
-		I can base it off of the sites' side, *if* i assume all cells are convex.
-		They would be in the voronoi-case.
-		Wait, fuck, I need the sites then too.
-		This is quickly becoming not-generalized.
-		I think I'll have to get rid of this whole "corn" thing maybe.
-		*/
+		echo = atoll_fence_clipEdge_bringEdgeToVertex(
+			d, edge,
+			edge_side, in_side,
+			intersect
+		);
+		if (echo != NULL) return gu_echo_wrap(echo, 0, "unable to set the edge-end to a new vertex");
 
 		/*
 		
@@ -186,10 +180,77 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge(
 	if (edge_side[0] & in_side) return NULL; //entirely inside
 
 	return gu_echo_new(0, "TODO: entirely-outside edges");
+}
 
-	#undef EV
-	#undef PV
+static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_getSides(
+	const struct atoll_diagram * /*nonull*/ d,
 
+	struct gumetry_point center,
+	unsigned int edge, unsigned int pedge,
+	uint8_t edge_side[static 2],
+	uint8_t poly_side[static 2],
+	uint8_t in_side[static 1]
+)
+{
+
+		in_side[0] = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], center);
+		if (in_side == 0) return gu_echo_new(0, "the center should never be on the polygon");
+
+		edge_side[0] = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], d->vertices[EV[0]]);
+		edge_side[1] = gumetry_line_side(d->vertices[PV[0]], d->vertices[PV[1]], d->vertices[EV[1]]);
+		if ((edge_side[0] | edge_side[1]) == 0) return gu_echo_new(0, "TODO: collinear case");
+		//if (edge_side[0] & edge_side[1]) continue; // no intersection
+
+		poly_side[0] = gumetry_line_side(d->vertices[EV[0]], d->vertices[EV[1]], d->vertices[PV[0]]);
+		poly_side[1] = gumetry_line_side(d->vertices[EV[0]], d->vertices[EV[1]], d->vertices[PV[1]]);
+		//if (poly_side[0] & poly_side[1]) continue; // no intersection
+
+		return NULL;
+}
+static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_getIntersect(
+	const struct atoll_diagram * /*nonull*/ d,
+	unsigned int edge, unsigned int pedge,
+	const uint8_t edge_side[static 2],
+	const uint8_t poly_side[static 2],
+	struct gumetry_point dest[static 1]
+)
+{
+		if      (edge_side[0] == 0) *dest = d->vertices[EV[0]];
+		else if (edge_side[1] == 0) *dest = d->vertices[EV[1]];
+		else if (poly_side[0] == 0) *dest = d->vertices[PV[0]];
+		else if (poly_side[1] == 0) *dest = d->vertices[PV[1]];
+		else {
+			int e = gumetry_line_intersection(
+				dest,
+				d->vertices[EV[0]], d->vertices[EV[1]],
+				d->vertices[PV[0]], d->vertices[PV[1]]
+			);
+			if (e != gumetry_INTERSECT) return gu_echo_new(e, "should always be an intersection here. Rounding error?");
+		}
+		return NULL;
+}
+
+static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_bringEdgeToVertex(
+	struct atoll_diagram * /*nonull*/ d,
+	unsigned int edge,
+	const uint8_t edge_side[static 2],
+	uint8_t in_side,
+	struct gumetry_point intersect
+)
+{
+		int e = gu_unstable_intlist_push(
+			&d->vertices, &d->vertices_length, &d->vertices_allocation, &intersect
+		);
+		if (e) return gu_echo_new(e, "unable to push new vertex");
+		if (edge_side[0] != 0 && edge_side[0] != in_side) {
+			e = atoll_edge_replaceVertex(d->hedges, edge, EV[0], d->vertices_length - 1);
+			if (e) return gu_echo_new(e, "unable to replace with new vertex (0)");
+		} else if (edge_side[1] != 0 && edge_side[1] != in_side) {
+			e = atoll_edge_replaceVertex(d->hedges, edge, EV[1], d->vertices_length - 1);
+			if (e) return gu_echo_new(e, "unable to replace with new vertex (1)");
+		}
+
+		return NULL;
 }
 
 
