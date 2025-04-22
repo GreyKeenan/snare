@@ -48,7 +48,7 @@ static inline /*heap*/ struct gu_echo *atoll_fence_clipEdge_bringEdgeToVertex(
 /*heap*/ struct gu_echo *atoll_fence(
 	struct atoll_diagram * /*nonull*/ diagram,
 
-	struct gumetry_point * /*nonull*/ polygon,
+	const struct gumetry_point * /*nonull*/ polygon,
 	unsigned int polygon_length
 )
 {

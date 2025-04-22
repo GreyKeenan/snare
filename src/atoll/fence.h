@@ -10,7 +10,7 @@ struct gu_echo;
 /*heap*/ struct gu_echo *atoll_fence(
 	struct atoll_diagram * /*nonull*/ diagram,
 
-	struct gumetry_point * /*nonull*/ polygon,
+	const struct gumetry_point * /*nonull*/ polygon,
 	unsigned int vertex_count
 );
 /*

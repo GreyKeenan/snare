@@ -84,7 +84,7 @@ void atoll_diagram_reset(struct atoll_diagram *self)
 
 int atoll_diagram_addPolygon(
 	struct atoll_diagram self[static 1],
-	struct gumetry_point * /*nonull*/ polygon,
+	const struct gumetry_point * /*nonull*/ polygon,
 	unsigned int polygon_length,
 	unsigned int outside, unsigned int inside
 )

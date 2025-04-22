@@ -3,7 +3,7 @@
 
 struct gumetry_point { double x, y; };
 
-static inline struct gumetry_point gumetry_point_average(struct gumetry_point * /*nonull*/ points, unsigned int count)
+static inline struct gumetry_point gumetry_point_average(const struct gumetry_point * /*nonull*/ points, unsigned int count)
 {
 	double x = 0;
 	double y = 0;
