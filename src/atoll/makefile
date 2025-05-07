@@ -28,6 +28,10 @@ lib:
 	mv *.o $(obdir)
 	ar rcs $(root)/lib$(name).a $(obdir)/*.o
 
+# whatever the current debugging flags/defines are can be pencilled in here.
+debug:
+	make lib args="$(args)"
+
 testcomp:
 	gcc $(gccflags) -iquote tests $(args) \
 		tests/$(tf) \
@@ -77,5 +81,7 @@ convergence:
 simple:
 	make testcomp "tf=simple.c" "links= -lSDL2"
 
+simple_step_lib:
+	make lib args="-DATOLL_DEBUG_treasure"
 simple_step:
 	make testcomp "tf=simple.c" "links= -lSDL2" "args=-DDEBUGSTEP"

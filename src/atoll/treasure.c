@@ -6,6 +6,7 @@
 #include "./debug_paint.h"
 
 #include "gu/echo.h"
+#include "gu/debug.h"
 
 
 #define gu_DEBUGIF ATOLL_DEBUG_treasure
@@ -35,7 +36,7 @@ static inline /*heap*/ struct gu_echo *atoll_siteEvent(
 
 	while (1) {
 
-		atoll_DEBUG_paint(diagram, coast);
+		gu_debug( atoll_DEBUG_paint(diagram, coast); )
 
 		if (coast->nextSite >= diagram->site_count && coast->circles_length == 0) {
 			break;
